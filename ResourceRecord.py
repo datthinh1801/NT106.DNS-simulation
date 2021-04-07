@@ -11,12 +11,12 @@ class ResourceRecord:
         Initialze a Resource Record.
 
         Parameters:
-        name -> hostname (at max 255 bytes)
-        type -> 2 bytes of the RR TYPE code
-        rr_class -> 2 bytes of the RR CLASS code
-        ttl -> a 32 bit signed integer specifies the cache interval of this RR. 0 means do not cache
-        rdlength -> an unsigned 16 bit integer specifies the length in bytes of the RDATA field.
-        rdata -> data of corresponding query type
+        name        -> hostname (at max 255 bytes)
+        type        -> 2 bytes of the RR TYPE code
+        rr_class    -> 2 bytes of the RR CLASS code
+        ttl         -> a 32 bit signed integer specifies the cache interval of this RR. 0 means do not cache
+        rdlength    -> an unsigned 16 bit integer specifies the length in bytes of the RDATA field.
+        rdata       -> data of corresponding query type
 
         rdata:
         ._______________________________________.
@@ -61,15 +61,28 @@ class ResourceRecord:
             self._rdlength = None
             self._rdata = None
 
-    def _validate_(self, name: str, rr_type: int, rr_class: int, ttl, rdlength: int, rdata: str) -> bool:
+    def _check_data_type_(self, *args, dtype: str) -> bool:
+        """Check if variables are of dtype."""
+        for arg in args:
+            if str(type(arg)) != f"<class '{dtype}'>":
+                return False
+        return True
+
+    def _validate_(self, name: str, rr_type: int, rr_class: int, ttl: int, rdlength: int, rdata: str) -> bool:
         """Validate inputs before setting these values for the RR."""
+        # check data types
+        if not self._check_data_type_(name, rdata, dtype='str'):
+            return False
+        elif not self._check_data_type_(rr_type, rr_class, ttl, rdlength, dtype='int'):
+            return False
+
         # check if hostname is empty or exceeds the size limit of 255 bytes
         if name == "" or len(name) > 255:
             return False
-        # check if hostname is not of the format label.label[.label[.label]]
+        # check if hostname is not of the format label.label[.label[.label...]]
         elif len(name.split(".")) <= 1:
             return False
-        # check if hostname is of valid format, check if each label exceeds size limit of 63 bytes
+        # if hostname is of valid format, check if any label of hostname exceeds size limit of 63 bytes
         elif len(name.split(".")) > 1:
             for label in name.split("."):
                 if len(label) > 63:
@@ -87,4 +100,5 @@ class ResourceRecord:
         elif rdlength < 0 or rdlength != len(rdata):
             return False
 
+        # overall true
         return True
