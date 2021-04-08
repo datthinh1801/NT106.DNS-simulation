@@ -4,6 +4,7 @@ from ResourceRecord import ResourceRecord
 
 class MessageQuestion:
     # Static variables
+    # These string keys will be covnerted to integers in transmission
     QTYPE = dict(ResourceRecord.TYPE)
     QTYPE.update(
         {"AXFR": 252, "MAILB": 253, "MAILA": 254, "*": 255})
@@ -17,6 +18,10 @@ class MessageQuestion:
             self._qname = qname
             self._qtype = qtype
             self._qclass = qclass
+        else:
+            self._qname = None
+            self._qtype = None
+            self._qclass = None
 
     def _check_data_type_(self, *args, dtype: str) -> bool:
         """Check if variables are of dtype."""
@@ -50,6 +55,22 @@ class MessageQuestion:
         # check if qclass is of invalid code
         elif qclass not in MessageQuestion.QCLASS.values():
             return False
-        
+
         # overall true
         return True
+
+    def is_None(self) -> bool:
+        """Return True if this is a None-type MessageQuestion."""
+        return self._qname == None
+
+    def __eq__(self, question: MessageQuestion):
+        """Object assignment."""
+        pass
+
+    def to_string(self) -> str:
+        """
+        Convert to a string.
+        The resulting string has 1 line.
+        #1 <hostname>;<qtype>;<qclass>
+        """
+        return self._qname + ";" + self._qtype + ";" + self._qclass
