@@ -2,6 +2,7 @@
 
 class ResourceRecord:
     # Static variables
+    # These string keys will be converted to integers in transmission
     TYPE = {"A": 1, "NS": 2, "CNAME": 5, "SOA": 6, "WKS": 11,
             "PTR": 12, "HINFO": 13, "MX": 15, "TXT": 16}
     CLASS = {"IN": 1, "CH": 3, "HS": 4}
@@ -102,3 +103,11 @@ class ResourceRecord:
 
         # overall true
         return True
+
+    def to_string(self) -> str:
+        """
+        Convert to a string.
+        The resulting has 1 line.
+        #1 <hostname>;<type>;<class>;<value>
+        """
+        return self._name + ";" + self._type + ";" + self._class + ";" + self._rdata
