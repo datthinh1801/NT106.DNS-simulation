@@ -3,26 +3,26 @@ import random
 
 
 class MessageHeader:
-    def __init__(self, qr=0, opcode=0, aa=False, tc=False, rd=True, ra=True, rcode=0, qdcount=0, ancount=0, nscount=0, arcount=0):
+    def __init__(self, id: int = None, qr: int = 0, opcode: int = 0, aa: bool = False, tc: bool = False, rd: bool = True, ra: bool = True, rcode: int = 0, qdcount: int = 0, ancount: int = 0, nscount: int = 0, arcount: int = 0):
         """
         Initialize the header of a Message.
         Default values:
-        QR = 0 --> This Message is a query.
-        OPCODE = 0 --> This Message is a standard query.
-        AA = False --> This is a query, so it has nothing to do with Authoritative Answer flag.
-        TC = False --> This Message is not truncated.
-        RD = True --> Ask for recursive query.
-        RA = True --> Resursion available by default.
+        QR = 0      --> This Message is a query.
+        OPCODE = 0  --> This Message is a standard query.
+        AA = False  --> This is a query, so it has nothing to do with Authoritative Answer flag.
+        TC = False  --> This Message is not truncated.
+        RD = True   --> Ask for recursive query.
+        RA = True   --> Resursion available by default.
+        RCODE = 0   --> No error
         All other fields are initialized to 0.
         """
         # 16-bit identifier
-        self._id = random.randint(0, pow(2, 16) - 1)
+        self._id = random.randint(0, pow(2, 16) - 1) if id == None else id
         # 1-bit flag specifies if this Message is a query (0) or a response (1)
         self._qr = qr
         # 4-bit flag (values range from 0 to 15) specifies the kind of query
         self._opcode = opcode
         # 1-bit Authoritative Answer - valid in responses, specifies whether an authoritative server answers the request
-        # this only see the first RR to set the bit
         self._aa = aa
         # [TrunCation] 1-bit flag specifies if the Message is truncated
         self._tc = tc
@@ -92,7 +92,7 @@ class MessageHeader:
         if code >= 0 and code <= 15:
             self._rcode = code
 
-    def set_qdcount(self, field: str, count: int) -> None:
+    def set_count(self, field: str, count: int) -> None:
         """
         Set the field to a given count value.
         field = ["qd", "an", "ns", "ar"]
@@ -106,3 +106,50 @@ class MessageHeader:
                 self._nscount = count
             elif field == "ar":
                 self._arcount = count
+
+    def __eq__(self, header: MessageHeader):
+        """Object assignment."""
+        pass
+
+    def to_string(self) -> str:
+        """
+        Convert to a string.
+        The resulting string has 6 lines.
+        #1 ID in hex
+        #2 16-bit flags
+        #3 QDCOUNT
+        #4 ANCOUNT
+        #5 NSCOUNT
+        #6 ARCOUNT
+        """
+        string = ""
+        # get ID
+        string += str(self._id) + "\n"
+
+        # get flags
+        header = ""
+        # QR flag 1-bit
+        header += str(int(self._qr))
+        # OPCODE 4-bit
+        header += bin(self._opcode)[2:].rjust(4, "0")
+        # AA flag 1-bit
+        header += str(int(self._aa))
+        # TC flag 1-bit
+        header += str(int(self._tc))
+        # RD flag 1-bit
+        header += str(int(self._rd))
+        # RA flag 1-bit
+        header += str(int(self._ra))
+        # Z flag 3-bit
+        header += str(self._z) * 3
+        # RCODE 4-bit
+        header += bin(self._rcode)[2:].rjust(4, "0")
+
+        string += hex(int(header, 2)) + "\n"
+
+        # get counts
+        string += self._qdcount + "\n"
+        string += self._ancount + "\n"
+        string += self._nscount + "\n"
+        string += self._arcount + "\n"
+        return string
