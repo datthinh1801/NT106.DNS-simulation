@@ -13,7 +13,45 @@ class MessageQuestion:
     QCLASS.update({"*": 255})
 
     def __init__(self, qname: str, qtype: int, qclass: int):
-        """Initialize a question."""
+        """
+        Initialize a question.
+
+        Parameters:
+        qname       -> Query hostname
+        qtype       -> Query type
+        qclass      -> Query class
+
+        type:
+        ._______________________.
+        |   Type    |   Int     |
+        |___________|___________|
+        |   A       |   1       |
+        |   NS      |   2       |
+        |   CNAME   |   5       |
+        |   SOA     |   6       |
+        |   WKS     |   11      |
+        |   PTR     |   12      |
+        |   HINFO   |   13      |
+        |   MX      |   15      |
+        |   TXT     |   16      |
+        |   AXFR    |   252     |
+        |   MAILB   |   253     |
+        |   MAILA   |   254     |
+        |   *       |   255     |
+        |___________|___________|
+        class:
+        ._______________________.
+        |   Class   |   Int     |
+        |___________|___________|
+        |   IN      |   1       |
+        |   CH      |   3       |
+        |   HS      |   4       |
+        |   *       |   255     |
+        |___________|___________|
+
+        """
+        qname = qname.lower()
+
         if self._validate_(qname, qtype, qclass):
             self._qname = qname
             self._qtype = qtype
@@ -63,14 +101,10 @@ class MessageQuestion:
         """Return True if this is a None-type MessageQuestion."""
         return self._qname == None
 
-    def __eq__(self, question: MessageQuestion):
-        """Object assignment."""
-        pass
-
     def to_string(self) -> str:
         """
         Convert to a string.
         The resulting string has 1 line.
         #1 <hostname>;<qtype>;<qclass>
         """
-        return self._qname + ";" + self._qtype + ";" + self._qclass
+        return self._qname + ";" + str(self._qtype) + ";" + str(self._qclass)
