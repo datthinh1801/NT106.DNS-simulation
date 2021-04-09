@@ -1,6 +1,7 @@
 # Message class definition
-from MessageHeader import *
-from MessageQuestion import *
+from MessageHeader import MessageHeader
+from MessageQuestion import MessageQuestion
+from copy import copy
 
 #########################################
 #                 NOTE                  #
@@ -10,7 +11,7 @@ from MessageQuestion import *
 
 
 class Message:
-    def __init__(self, request: Message = None, header: MessageHeader = None, question: MessageQuestion = None):
+    def __init__(self, request=None, header: MessageHeader = None, question: MessageQuestion = None):
         """
         Initialize a Message.
 
@@ -35,18 +36,21 @@ class Message:
         self._additional = []
 
         if request != None:
-            self._header = request._header
-            self._question = request._question
+            self._header = copy(request._header)
+            self._question = copy(request._question)
+            self.set_header_flags(qr=1)
         elif header != None and question != None:
             self._header = header
             self._question = question
         else:
             raise Exception("Parameter Error")
 
-    def set_header_flags_automatically(self):
+        self._set_header_flags_automatically()
+
+    def _set_header_flags_automatically(self):
         """
         Set header flags based on properties of the Message object.
-        This helper method will set the following flags:
+        This method will set the following flags:
         - QR
         - RCODE
         - QDCOUNT
@@ -63,8 +67,6 @@ class Message:
         # check Count sections and set related flags
         if len(self._answer) > 0:
             self._header.set_count("an", len(self._answer))
-            # If there is some answers, this is a response Message
-            self._header.set_qr_flag(1)
         if len(self._authority) > 0:
             self._header.set_count("ns", len(self._authority))
         if len(self._additional) > 0:
@@ -92,11 +94,36 @@ class Message:
     def add_new_records_to_answer_section(self, records: list):
         """Add new records to the ANSWER section."""
         self._answer += records
+        self._set_header_flags_automatically()
 
     def add_records_to_authority_section(self, records: list):
         """Add new records to the AUTHORITY section."""
         self._authority += records
+        self._set_header_flags_automatically()
 
     def add_records_to_additional_section(self, records: list):
         """Add new records to the ADDITIONAL section."""
         self._additional += records
+        self._set_header_flags_automatically()
+
+    def set_header_flags(self, qr: int = None, opcode: int = None, aa: bool = None, tc: bool = None, rd: bool = None, ra: bool = None, rcode: int = None):
+        """
+        Set specified header's flags.
+        flag=None means not affected.
+        """
+        self._set_header_flags_automatically()
+
+        if qr != None:
+            self._header.set_qr_flag()
+        if opcode != None:
+            self._header.set_opcode(opcode)
+        if aa != None and aa == True:
+            self._header.set_authoritative_flag()
+        if tc != None and tc == True:
+            self._header.set_truncate_flag()
+        if rd != None and rd == False:
+            self._header.clear_recursion_desire_flag()
+        if ra != None and ra == False:
+            self._header.clear_recursion_available_flag()
+        if rcode != None:
+            self._header.set_rcode(rcode)
