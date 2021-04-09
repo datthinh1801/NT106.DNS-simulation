@@ -6,6 +6,7 @@ class MessageHeader:
     def __init__(self, id: int = None, qr: int = 0, opcode: int = 0, aa: bool = False, tc: bool = False, rd: bool = True, ra: bool = True, rcode: int = 0, qdcount: int = 0, ancount: int = 0, nscount: int = 0, arcount: int = 0):
         """
         Initialize the header of a Message.
+
         Default values:
         QR = 0      --> This Message is a query.
         OPCODE = 0  --> This Message is a standard query.
@@ -14,6 +15,7 @@ class MessageHeader:
         RD = True   --> Ask for recursive query.
         RA = True   --> Resursion available by default.
         RCODE = 0   --> No error
+
         All other fields are initialized to 0.
         """
         # 16-bit identifier
@@ -43,13 +45,9 @@ class MessageHeader:
         # 16-bit int specifies the number of RRs in the Additional Records section
         self._arcount = arcount
 
-    def set_qr_flag(self, flag: bool) -> None:
-        """
-        Set the query flag.
-        0 -> A query
-        1 -> A response
-        """
-        self._qr = flag
+    def set_qr_flag(self) -> None:
+        """[Only valid in responses] Set the query flag."""
+        self._qr = 1
 
     def set_opcode(self, code: int) -> None:
         """
@@ -59,7 +57,7 @@ class MessageHeader:
         2 -> Server status request (STATUS)
         3-15 -> Reseverd for future use
         """
-        if code >= 0 and code <= 15:
+        if code in [0, 15]:
             self._opcode = code
 
     def set_authoritative_flag(self) -> None:
@@ -67,14 +65,14 @@ class MessageHeader:
         self._aa = True
 
     def set_truncate_flag(self) -> None:
-        """[Only valid in responses] Set the truncate flag to True"""
+        """[Only valid in responses] Set the truncate flag to True."""
         self._tc = True
 
-    def clear_recursion_desire(self) -> None:
+    def clear_recursion_desire_flag(self) -> None:
         """Clear the recursion desire flag."""
         self._rd = False
 
-    def clear_recursion_available(self) -> None:
+    def clear_recursion_available_flag(self) -> None:
         """Clear the recursion available flag."""
         self._ra = False
 
@@ -89,7 +87,7 @@ class MessageHeader:
         5 -> Refused - The name server refuses to perform the specified operation for policy reasons.
         6-15 -> Reserved for future use.
         """
-        if code >= 0 and code <= 15:
+        if code in [0, 15]:
             self._rcode = code
 
     def set_count(self, field: str, count: int) -> None:
@@ -106,10 +104,6 @@ class MessageHeader:
                 self._nscount = count
             elif field == "ar":
                 self._arcount = count
-
-    def __eq__(self, header: MessageHeader):
-        """Object assignment."""
-        pass
 
     def to_string(self) -> str:
         """
@@ -148,8 +142,8 @@ class MessageHeader:
         string += hex(int(header, 2)) + "\n"
 
         # get counts
-        string += self._qdcount + "\n"
-        string += self._ancount + "\n"
-        string += self._nscount + "\n"
-        string += self._arcount + "\n"
+        string += str(self._qdcount) + "\n"
+        string += str(self._ancount) + "\n"
+        string += str(self._nscount) + "\n"
+        string += str(self._arcount)
         return string
