@@ -78,7 +78,7 @@ class Message:
         The resulting string has multiple lines.
         #1-6    Header's fields
         #7      Question
-        #Remaining lines are records (inspect the header for their quantities)
+        #Remaining lines are the numbers of records of each section
         """
         msg = ""
         msg += self._header.to_string() + "\n"
@@ -127,3 +127,15 @@ class Message:
             self._header.clear_recursion_available_flag()
         if rcode != None:
             self._header.set_rcode(rcode)
+
+    def get_answer_records(self):
+        """Return a copy of the list of ResourceRecords in the Answer section."""
+        return copy(self._answer)
+
+    def get_authority_records(self):
+        """Return a copy of the list of ResourceRecords in the Authority section."""
+        return copy(self._authority)
+
+    def get_additional_records(self):
+        """Return a copy of the list of ResourceRecords in the Addtional section."""
+        return copy(self._additional)
