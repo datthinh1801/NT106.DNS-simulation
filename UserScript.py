@@ -5,6 +5,7 @@ domain name will be written to an output file; otherwise, write out a "Timeout".
 """
 import argparse
 from socket import *
+from constants import RESOLVER_ADDR
 
 
 def parse_args():
@@ -57,11 +58,6 @@ def make_query(args_obj) -> str:
     Create a socket and send a query to resolver.
     Return the inquired IP address (if any); otherwise None.
     """
-    # Initialize resolver's configuration
-    resolver_port = 5353
-    resolver_ip = '172.31.201.149'
-    resolver_addr = (resolver_ip, resolver_port)
-
     # Create a socket for client program
     client_socket = socket(AF_INET, SOCK_DGRAM)
     # Set timeout for 1 second
@@ -70,7 +66,7 @@ def make_query(args_obj) -> str:
     # Prepare a message for transmission
     msg = f"{args_obj.qname[0]};{args_obj.qtype};{args_obj.qclass}"
     # Send the message to the resolver
-    client_socket.sendto(msg.encode(), resolver_addr)
+    client_socket.sendto(msg.encode(), RESOLVER_ADDR)
     # Extract the response only
     response = client_socket.recvfrom(1024)[0]
     client_socket.close()
@@ -78,6 +74,8 @@ def make_query(args_obj) -> str:
 
 
 args = parse_args()
+
+# Catch socket.timeout exception
 try:
     reponse = make_query(args)
 except timeout:
