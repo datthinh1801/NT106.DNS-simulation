@@ -93,7 +93,7 @@ class MessageHeader:
     def set_count(self, field: str, count: int) -> None:
         """
         Set the field to a given count value.
-        field = ["qd", "an", "ns", "ar"]
+        field = ("qd", "an", "ns", "ar")
         """
         if count >= 0:
             if field == "qd":
@@ -108,7 +108,8 @@ class MessageHeader:
     def to_string(self) -> str:
         """
         Convert to a string.
-        The resulting string has 6 lines.
+        The resulting string has 6 lines:
+
         #1 ID in hex
         #2 16-bit flags
         #3 QDCOUNT
