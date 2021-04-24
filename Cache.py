@@ -13,26 +13,26 @@ class Cache:
 
     def reset_cache(self):
         current_time = time.time()
-        if self.cache_ttd >= current_time: # đã đến lúc để dọn dẹp 
+        if self.cache_ttd <= current_time: # đã đến lúc để dọn dẹp 
             black_list = [] # hết hạn thì vô đây
             for (i, rr) in self.data.items():
-                if rr.ttl >= current_time: # ttl of resourcerecord
+                if rr.ttl <= current_time: # ttl of resourcerecord
                     black_list.append(k) # không thể xoá dictionary khi dùng iteritems
             for i in black_list:
                 del self.data[i] # nên giờ mới xoá nè
             current_time = time.time() 
             self.cache_ttd = current_time + self.cache_ttl
 
-    def get(self, key):
-        #key = (name: str,rr_type: int, rr_class:int)
+    def get(self, ntc):
+        #ntc = (name: str,rr_type: int, rr_class:int)
         self.reset_cache()
-        rr = self.data[key]
-        if rr is None or rr.ttl <= time.time():
+        rr = self.data[ntc]
+        if rr is None:
             return None
         return rr
 
-    def put(self, key, record):
-        #key = (name: str,rr_type: int, rr_class:int)
-        #value = ResourceRecord: object
+    def put(self, ntc, record):
+        #ntc = (name: str,rr_type: int, rr_class:int)
+        #record = ResourceRecord: object
         self.reset_cache()
-        self.data[key] = record
+        self.data[ntc] = record
