@@ -77,6 +77,7 @@ def parse_string_resource_record(rr: str) -> ResourceRecord:
 def parse_string_msg(msg: str) -> Message:
     """Parse a message string to a Message object."""
     lines = msg.splitlines()
+    
     # [header]
     header_id = lines[0]
     header_flags = lines[1]

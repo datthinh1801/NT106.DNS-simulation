@@ -131,6 +131,6 @@ class ResourceRecord:
         """
         Convert to a string.
         The resulting has 1 line.
-        #1 <hostname>;<type>;<class>;<value>
+        #1 <hostname>;<type>;<class>;<ttl>;<value>
         """
-        return self._name + ";" + str(self._type) + ";" + str(self._class)+";" +str(self._ttl) + ";" + self._rdata
+        return self._name + ";" + str(self._type) + ";" + str(self._class) + ";" + str(self._ttl) + ";" + self._rdata
