@@ -8,8 +8,8 @@ class Cache:
     def __init__(self, record:ResourceRecord = None, cache_ttl=1000):
         # Initialize a DNS cache.
         self.data = {}
-        self.cache_ttl = ttl # time to live
-        self.cache_ttd = time.time() + self._cache_ttl # time to die
+        self.cache_ttl = cache_ttl # time to live
+        self.cache_ttd = time.time() + self.cache_ttl # time to die
 
     def reset_cache(self):
         current_time = time.time()
@@ -34,5 +34,5 @@ class Cache:
     def put(self, key, value):
         #key = (name: str,rr_type: int, rr_class:int)
         #value = ResourceRecord: object
-            self.reset_cache()
-            self.data[key] = value
+        self.reset_cache()
+        self.data[key] = value
