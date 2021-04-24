@@ -68,7 +68,7 @@ def parse_string_resource_record(rr: str) -> ResourceRecord:
 
 def parse_string_msg(msg: str) -> Message:
     """Parse a message string to a Message object."""
-    lines = str.splitlines()
+    lines = msg.splitlines()
 
     # [header]
     header_id = lines[0]
@@ -100,7 +100,7 @@ def parse_string_msg(msg: str) -> Message:
     cur_line = 7
 
     # Create the Message object
-    message = Message(MessageHeader=header, MessageQuession=question)
+    message = Message(header=header, question=question)
 
     # [KNOWN ERROR]
     # If the message is truncated, the counts will decline automatically
