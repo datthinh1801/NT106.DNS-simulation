@@ -133,4 +133,4 @@ class ResourceRecord:
         The resulting has 1 line.
         #1 <hostname>;<type>;<class>;<value>
         """
-        return self._name + ";" + str(self._type) + ";" + str(self._class) + ";" + self._rdata
+        return self._name + ";" + str(self._type) + ";" + str(self._class)+";" +str(self._ttl) + ";" + self._rdata

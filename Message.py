@@ -93,17 +93,17 @@ class Message:
 
     def add_new_records_to_answer_section(self, records: list):
         """Add new records to the ANSWER section."""
-        self._answer += records
+        self._answer.append(records)
         self._set_header_flags_automatically()
 
     def add_records_to_authority_section(self, records: list):
         """Add new records to the AUTHORITY section."""
-        self._authority += records
+        self._authority.append(records)
         self._set_header_flags_automatically()
 
     def add_records_to_additional_section(self, records: list):
         """Add new records to the ADDITIONAL section."""
-        self._additional += records
+        self._additional.append(records)
         self._set_header_flags_automatically()
 
     def set_header_flags(self, qr: int = None, opcode: int = None, aa: bool = None, tc: bool = None, rd: bool = None, ra: bool = None, rcode: int = None):
