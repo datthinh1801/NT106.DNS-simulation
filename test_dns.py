@@ -1,21 +1,21 @@
-# import dns.resolver
-# import dns.zone
-# #test enter wrong domain name with false rasie exception
-# domain = "wired.com"
-# #domain = "a.ns.facebook.com"
-# print("--- Viet nam server ---")
-# my_resolver = dns.resolver.Resolver()
-# # Public IP of Vietnam Internet Network Information Center 
-# my_resolver.nameservers=['203.119.36.106']
-# #my_resolver.nameservers = ['129.134.30.12']
-# answer = my_resolver.resolve(domain)
-# print(answer.response)
-# print ("--- Google server ---")
-# my_resolver = dns.resolver.Resolver()
-# # Public IP of Vietnam Internet Network Information Center 
-# my_resolver.nameservers=['8.8.8.8']
-# answer = my_resolver.resolve(domain)
-# print(answer.response)
+import dns.resolver
+import dns.zone
+#test enter wrong domain name with false rasie exception
+domain = "facebook.com"
+#domain = "a.ns.facebook.com"
+print("--- Viet nam server ---")
+my_resolver = dns.resolver.Resolver()
+# Public IP of Vietnam Internet Network Information Center
+my_resolver.nameservers=['203.119.36.106']
+#my_resolver.nameservers = ['129.134.30.12']
+answer = my_resolver.resolve(domain)
+print(answer.response)
+print ("--- Google server ---")
+my_resolver = dns.resolver.Resolver()
+# Public IP of Vietnam Internet Network Information Center
+my_resolver.nameservers=['8.8.8.8']
+answer = my_resolver.resolve(domain)
+print(answer.response)
 
 
 # import dns.zone
@@ -49,11 +49,11 @@
 # master_answer = dns.resolver.resolve(soa_answer[0].mname, 'NS')
 
 # zone = dns.zone.from_xfr(dns.query.xfr('3.211.54.86','megacorpone.com'))
-
-import dns.zone
-
-zone = dns.zone.from_file(f='zonefile.txt')
-
-print(zone.to_text())
-for (name, ttl, rdata) in zone.iterate_rdatas('MX'):
-    print(name, ttl, rdata)
+#
+# import dns.zone
+#
+# zone = dns.zone.from_file(f='zonefile.txt')
+#
+# print(zone.to_text())
+# for (name, ttl, rdata) in zone.iterate_rdatas('MX'):
+#     print(name, ttl, rdata)

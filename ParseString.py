@@ -39,7 +39,7 @@ def parse_string_flag(flags: str) -> dict:
     # get 3-bit Z
     z_flg = bin_str[cur_bit_pos:cur_bit_pos+3]
     if z_flg != '':
-        d_flags['z'] = int(bin_str[cur_bit_pos: cur_bit_pos + 3] , 2)
+        d_flags['z'] = int(bin_str[cur_bit_pos: cur_bit_pos + 3], 2)
     else:
         d_flags['z'] = 0
     cur_bit_pos += 3
@@ -107,7 +107,7 @@ def parse_string_msg(msg: str) -> Message:
     cur_line = 7
 
     # Create the Message object
-    message = Message(header=header,question=question)
+    message = Message(header=header, question=question)
 
     # [KNOWN ERROR]
     # If the message is truncated, the counts will decline automatically
@@ -116,25 +116,19 @@ def parse_string_msg(msg: str) -> Message:
     # answers
     ans = []
     for _ in range(header_ancount):
-        print("line add: ",lines[cur_line])
-        ans.append(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_answer_section(parse_string_resource_record(lines[cur_line]))
         cur_line += 1
-    message.add_new_records_to_answer_section(ans)
 
     # authority
-    nss = []
     for _ in range(header_nscount):
-        print("line add: ",lines[cur_line])
-        nss.append(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_authority_section(parse_string_resource_record(lines[cur_line]))
         cur_line += 1
-    message.add_records_to_authority_section(nss)
 
     # additional
     ads = []
     for _ in range(header_arcount):
-        print("line add: ",lines[cur_line])
-        ads.append(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_additional_section(parse_string_resource_record(lines[cur_line]))
         cur_line += 1
-    message.add_records_to_additional_section(ads)
+
 
     return message

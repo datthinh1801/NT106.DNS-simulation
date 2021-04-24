@@ -62,14 +62,13 @@ class NameServer:
                 rdata = RRs[0]
                 resource_records = ResourceRecord(str(name), int(rr_type), int(rr_class), int(ttl), str(rdata))
                 if i == 1:
-                    message_response.add_new_records_to_answer_section(resource_records)
+                    message_response.add_a_new_record_to_answer_section(resource_records)
                 if i == 2:
                     for j in range(len(RRs)):
                         rdata = RRs[j]
-                        resource_records = ResourceRecord(str(name), int(rr_type), int(rr_class), int(ttl), str(rdata))
-                        message_response.add_records_to_authority_section(resource_records)
+                        message_response.add_a_new_record_to_authority_section(ResourceRecord(str(name), int(rr_type), int(rr_class), int(ttl), str(rdata)))
                 if i == 3:
-                    message_response.add_records_to_additional_section(resource_records)
+                    message_response.add_a_new_record_to_additional_section(resource_records)
 
         # return message response
         return message_response
@@ -95,9 +94,14 @@ class NameServer:
     def Query_Out(self, message_query: Message = None):
         qname = message_query._question._qname
         qtype = message_query._question._qtype
-        resolve_query = dns.resolver.resolve(qname, Get_key_from_values(QTYPE, qtype), raise_on_no_answer=False)
+        resolver = dns.resolver.Resolver()
+        resolver.nameservers = ['8.8.8.8']
+        resolve_query = resolver.resolve(qname, Get_key_from_values(QTYPE, qtype), raise_on_no_answer=False)
+        print("Resolver result: ")
+        print(resolve_query.response)
         # handle error query here
         response_message = self.Convert_response_answer_to_response_message(resolve_query.response, message_query)
+
         return response_message
 
     def start_listening_TCP(self):
@@ -139,7 +143,6 @@ class NameServer:
             byteData = sock.recvfrom(buffersize)
             data_receive = byteData[0].decode('utf-8')
             client_address = byteData[1]
-            print("data receive: ", data_receive)
             if data_receive:
                 message_query = parse_string_msg(data_receive)
                 message_result = self.Query_handle(message_query)
@@ -200,4 +203,11 @@ EXPIRE          A 32 bit time value that specifies the upper limit on
 """
 
 name_sv = NameServer()
+# header = MessageHeader(qr=0,rd=True,ra=True)
+# question = MessageQuestion("www.facebook.com",qtype=1,qclass=1)
+# message = Message(header=header,question=question)
+# print("request: ",message._header.to_string())
+# response = name_sv.Query_handle(message)
+
 name_sv.start_listening_UDP()
+
