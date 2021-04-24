@@ -136,7 +136,7 @@ class MessageHeader:
         # RA flag 1-bit
         header += str(int(self._ra))
         # Z flag 3-bit
-        header += str(self._z) * 3
+        header += bin(self._z)[2:].rjust(3, "0")
         # RCODE 4-bit
         header += bin(self._rcode)[2:].rjust(4, "0")
 
