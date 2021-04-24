@@ -40,8 +40,8 @@ class Message:
             self._question = copy(request._question)
             self.set_header_flags(qr=1)
         elif header != None and question != None:
-            self._header = header
-            self._question = question
+            self._header = copy(header)
+            self._question = copy(question)
         else:
             raise Exception("Parameter Error")
 
@@ -91,7 +91,7 @@ class Message:
             msg += record.to_string() + "\n"
         return msg
 
-    def add_new_records_to_answer_section(self, records: list):
+    def add_records_to_answer_section(self, records: list):
         """Add new records to the ANSWER section."""
         self._answer += records
         self._set_header_flags_automatically()
