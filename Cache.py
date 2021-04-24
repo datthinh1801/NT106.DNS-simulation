@@ -26,10 +26,10 @@ class Cache:
     def get(self, key):
         #key = (name: str,rr_type: int, rr_class:int)
         self.reset_cache()
-        v = self.data[key]
-        if v is None or v.ttl <= time.time():
+        rr = self.data[key]
+        if rr is None or rr.ttl <= time.time():
             return None
-        return v
+        return rr
 
     def put(self, key, value):
         #key = (name: str,rr_type: int, rr_class:int)
