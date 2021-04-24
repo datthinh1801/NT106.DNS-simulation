@@ -31,8 +31,8 @@ class Cache:
             return None
         return rr
 
-    def put(self, key, value):
+    def put(self, key, record):
         #key = (name: str,rr_type: int, rr_class:int)
         #value = ResourceRecord: object
         self.reset_cache()
-        self.data[key] = value
+        self.data[key] = record
