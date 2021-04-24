@@ -1,6 +1,7 @@
 # Message class definition
 from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
+from ResourceRecord import ResourceRecord
 from copy import copy
 
 #########################################
@@ -91,19 +92,19 @@ class Message:
             msg += record.to_string() + "\n"
         return msg
 
-    def add_records_to_answer_section(self, records: list):
-        """Add new records to the ANSWER section."""
-        self._answer += records
+    def add_a_new_record_to_answer_section(self, record: ResourceRecord):
+        """Add a new record to the ANSWER section."""
+        self._answer.append(record)
         self._set_header_flags_automatically()
 
-    def add_records_to_authority_section(self, records: list):
-        """Add new records to the AUTHORITY section."""
-        self._authority += records
+    def add_a_new_record_to_authority_section(self, record: ResourceRecord):
+        """Add a new record to the AUTHORITY section."""
+        self._authority.append(record)
         self._set_header_flags_automatically()
 
-    def add_records_to_additional_section(self, records: list):
-        """Add new records to the ADDITIONAL section."""
-        self._additional += records
+    def add_a_new_record_to_additional_section(self, record: ResourceRecord):
+        """Add a new record to the ADDITIONAL section."""
+        self._additional.append(record)
         self._set_header_flags_automatically()
 
     def set_header_flags(self, qr: int = None, opcode: int = None, aa: bool = None, tc: bool = None, rd: bool = None, ra: bool = None, rcode: int = None):

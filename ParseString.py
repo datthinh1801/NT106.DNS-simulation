@@ -37,11 +37,19 @@ def parse_string_flag(flags: str) -> dict:
     cur_bit_pos += 1
 
     # get 3-bit Z
-    d_flags['z'] = int(bin_str[cur_bit_pos: cur_bit_pos + 3], 2)
+    z_flg = bin_str[cur_bit_pos:cur_bit_pos+3]
+    if z_flg != '':
+        d_flags['z'] = int(bin_str[cur_bit_pos: cur_bit_pos + 3], 2)
+    else:
+        d_flags['z'] = 0
     cur_bit_pos += 3
 
     # get 4-bit RCODE
-    d_flags['rcode'] = int(bin_str[cur_bit_pos: cur_bit_pos + 4], 2)
+    r_code = bin_str[cur_bit_pos:cur_bit_pos+4]
+    if r_code != '':
+        d_flags['rcode'] = int(bin_str[cur_bit_pos: cur_bit_pos + 4], 2)
+    else:
+        d_flags['rcode'] = 0
 
     return d_flags
 
@@ -69,7 +77,7 @@ def parse_string_resource_record(rr: str) -> ResourceRecord:
 def parse_string_msg(msg: str) -> Message:
     """Parse a message string to a Message object."""
     lines = msg.splitlines()
-
+    
     # [header]
     header_id = lines[0]
     header_flags = lines[1]
@@ -109,22 +117,19 @@ def parse_string_msg(msg: str) -> Message:
     # answers
     ans = []
     for _ in range(header_ancount):
-        ans.append(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_answer_section(parse_string_resource_record(lines[cur_line]))
         cur_line += 1
-    message.add_records_to_answer_section(ans)
 
     # authority
-    nss = []
     for _ in range(header_nscount):
-        nss.append(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_authority_section(parse_string_resource_record(lines[cur_line]))
         cur_line += 1
-    message.add_records_to_authority_section(nss)
 
     # additional
     ads = []
     for _ in range(header_arcount):
-        ads.append(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_additional_section(parse_string_resource_record(lines[cur_line]))
         cur_line += 1
-    message.add_records_to_additional_section(ads)
+
 
     return message
