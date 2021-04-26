@@ -17,7 +17,7 @@ class Cache:
             black_list = [] # hết hạn thì vô đây
             for (i, rr) in self.data.items():
                 if rr.ttl <= current_time: # ttl of resourcerecord
-                    black_list.append(k) # không thể xoá dictionary khi dùng iteritems
+                    black_list.append(i) # không thể xoá dictionary khi dùng iteritems
             for i in black_list:
                 del self.data[i] # nên giờ mới xoá nè
             current_time = time.time() 
