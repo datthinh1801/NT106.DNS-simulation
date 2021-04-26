@@ -48,8 +48,7 @@ class Resolver:
         response = data_Respond.decode('utf-8')
         finally:
             TCPClientSocket.close()
-            return response
-    
+            return response    
 
     def query(self, message:str = None, tcp=False, source=None, source_port=0):
 
@@ -63,27 +62,41 @@ class Resolver:
         # if cache contain answer -> return else broadcast namesever
 
         #request:Message = ....
+        if self.nameservers is None:
+            self.nameservers = ['127.0.0.1']
+
         request = message
         response = None
         while response is None:
             if tcp:
-                newmessage = ... #pause
-                # format newmessage from objet to str
-                response = self.use_tcp(newmessage)
-
+                response = self.use_tcp(request)
             else:
-                newmessage = ... #pause
-                response =self.use_udp(newmessage)
+                response = self.use_udp(request)
 
             if not response is None:
                 break
-            # save to cache
+        
 
-        message_answer = # pause
-
-        rr = ResourceRecord(qname, qtype, qclass, 1000, response)
-        if self.cache:
-            self.cache.put((qname, qtype, qclass), rr)
+        message_answer = parse_string_msg(response)
+            
+        # save to cache
+        Save_to_Cache(message_answer)
+        
+        rr = message_answer._answer
+        # return ResoucrRecord answer
         return rr
 
-        
+    def Save_to_Cache(self, message_reponse:Message = None):
+        answer = message_reponse._answer
+        authority = message_reponse._authority
+        additional = message_reponse._additional
+
+        # add answer
+        self.cache.put((answer._name, answer._type, answer._class), answer)
+
+        #add authority
+        for i in authority:
+            self.cache.put( (i._name, i._type, i._class), i )
+            
+        #add additional
+        self.cache.put( (additional._name, additional._typy, additional._class), additional )
