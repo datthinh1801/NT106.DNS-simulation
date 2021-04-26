@@ -13,13 +13,13 @@ class Cache:
 
     def reset_cache(self):
         current_time = time.time()
-        if self.cache_ttd <= current_time: # đã đến lúc để dọn dẹp 
-            black_list = [] # hết hạn thì vô đây
+        if self.cache_ttd <= current_time: # time to delete
+            black_list = [] # list rr delete
             for (i, rr) in self.data.items():
                 if rr.ttl <= current_time: # ttl of resourcerecord
-                    black_list.append(i) # không thể xoá dictionary khi dùng iteritems
+                    black_list.append(i) 
             for i in black_list:
-                del self.data[i] # nên giờ mới xoá nè
+                del self.data[i] # delete
             current_time = time.time() 
             self.cache_ttd = current_time + self.cache_ttl
 
