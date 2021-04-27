@@ -70,10 +70,10 @@ class ResourceRecord:
         |____________|__________________________|
 
         """
-        name = name.lower()
-        rdata = rdata.lower()
 
         if self._validate_(name, rr_type, rr_class, ttl, rdata):
+            name = name.lower()
+            rdata = rdata.lower()
             self._name = name
             self._type = rr_type
             self._class = rr_class
@@ -87,6 +87,7 @@ class ResourceRecord:
             self._ttl = None
             self._rdlength = None
             self._rdata = None
+            raise Exception("Argument Exception")
 
     def _check_data_type_(self, *args, dtype: str) -> bool:
         """Check if variables are of dtype."""
