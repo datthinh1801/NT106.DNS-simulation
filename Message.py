@@ -1,6 +1,7 @@
 # Message class definition
 from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
+from ResourceRecord import ResourceRecord
 from copy import copy
 
 #########################################
@@ -40,8 +41,8 @@ class Message:
             self._question = copy(request._question)
             self.set_header_flags(qr=1)
         elif header != None and question != None:
-            self._header = header
-            self._question = question
+            self._header = copy(header)
+            self._question = copy(question)
         else:
             raise Exception("Parameter Error")
 
@@ -78,7 +79,7 @@ class Message:
         The resulting string has multiple lines.
         #1-6    Header's fields
         #7      Question
-        #Remaining lines are records (inspect the header for their quantities)
+        #Remaining lines are the numbers of records of each section
         """
         msg = ""
         msg += self._header.to_string() + "\n"
@@ -91,19 +92,19 @@ class Message:
             msg += record.to_string() + "\n"
         return msg
 
-    def add_new_records_to_answer_section(self, records: list):
-        """Add new records to the ANSWER section."""
-        self._answer += records
+    def add_a_new_record_to_answer_section(self, record: ResourceRecord):
+        """Add a new record to the ANSWER section."""
+        self._answer.append(record)
         self._set_header_flags_automatically()
 
-    def add_records_to_authority_section(self, records: list):
-        """Add new records to the AUTHORITY section."""
-        self._authority += records
+    def add_a_new_record_to_authority_section(self, record: ResourceRecord):
+        """Add a new record to the AUTHORITY section."""
+        self._authority.append(record)
         self._set_header_flags_automatically()
 
-    def add_records_to_additional_section(self, records: list):
-        """Add new records to the ADDITIONAL section."""
-        self._additional += records
+    def add_a_new_record_to_additional_section(self, record: ResourceRecord):
+        """Add a new record to the ADDITIONAL section."""
+        self._additional.append(record)
         self._set_header_flags_automatically()
 
     def set_header_flags(self, qr: int = None, opcode: int = None, aa: bool = None, tc: bool = None, rd: bool = None, ra: bool = None, rcode: int = None):
@@ -127,3 +128,15 @@ class Message:
             self._header.clear_recursion_available_flag()
         if rcode != None:
             self._header.set_rcode(rcode)
+
+    def get_answer_records(self):
+        """Return a copy of the list of ResourceRecords in the Answer section."""
+        return copy(self._answer)
+
+    def get_authority_records(self):
+        """Return a copy of the list of ResourceRecords in the Authority section."""
+        return copy(self._authority)
+
+    def get_additional_records(self):
+        """Return a copy of the list of ResourceRecords in the Addtional section."""
+        return copy(self._additional)
