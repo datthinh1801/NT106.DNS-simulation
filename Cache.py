@@ -14,18 +14,17 @@ class Cache:
     def refresh_cache(self):
         timestamp = time.time()
         if self.cache_ttd <= timestamp:  # time refresh
-            black_list = []  # list deletegit
+            black_list = []  # list delete
             for (i, rr) in self.data.items():
                 if rr.ttl >= timestamp:  # ttl of resourcerecord
-                    # không thể xoá dictionary khi dùng iteritems
+                    # can not delete dict when use iteritems
                     black_list.append(i)
             for i in black_list:
-                del self.data[i]  # nên giờ mới xoá nè
+                del self.data[i]  # delete
             timestamp = time.time()
             self.cache_ttd = timestamp + self.cache_ttl
 
-    def get(self, key):
-        # key = (name: str,rr_type: int, rr_class:int)
+    def get(self, key):         # key = (name: str,rr_type: int, rr_class:int)
         self.refresh_cache()
         rr = self.data.get(key)
         #rr = self.data[key]
@@ -33,8 +32,6 @@ class Cache:
             return None
         return rr
 
-    def put(self, key, record):
-        # key = (name: str,rr_type: int, rr_class:int)
-        # record = ResourceRecord: object
+    def put(self, key, record):        # record = ResourceRecord: object
         self.refresh_cache()
         self.data[key] = record
