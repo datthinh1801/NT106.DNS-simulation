@@ -6,6 +6,11 @@ class ResourceRecord:
     TYPE = {"A": 1, "NS": 2, "CNAME": 5, "SOA": 6, "WKS": 11,
             "PTR": 12, "HINFO": 13, "MX": 15, "TXT": 16}
     CLASS = {"IN": 1, "CH": 3, "HS": 4}
+    
+    INV_RRTYPE = {1: "A", 2: "NS", 5: "CNAME", 6: "SOA", 11: "WKS",
+            12: "PTR", 13: "HINFO", 15: "MX", 16: "TXT"}
+    
+    INV_RRCLASS = {1: "IN", 3: "CH", 4:"HS"}
 
     def __init__(self, name: str, rr_type: int, rr_class: int, ttl: int, rdata: str):
         """
