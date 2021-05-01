@@ -1,5 +1,5 @@
 # ResourceRecord definition
-import 
+import time
 
 class ResourceRecord:
     # Static variables
