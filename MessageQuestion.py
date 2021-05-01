@@ -11,6 +11,14 @@ class MessageQuestion:
 
     QCLASS = dict(ResourceRecord.CLASS)
     QCLASS.update({"*": 255})
+    
+    INV_QTYPE = dict(ResourceRecord.INV_RRTYPE)
+    INV_QTYPE.update(
+        {252: "AXFR", 253: "MAILB", 254: "MAILA", 255: "*"})
+    
+    INV_QCLASS = dict(ResourceRecord.INV_RRCLASS)
+    INV_QCLASS.update({255: "*"})
+
 
     def __init__(self, qname: str, qtype: int, qclass: int):
         """
