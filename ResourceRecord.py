@@ -135,7 +135,7 @@ class ResourceRecord:
         return True
     
     def reset_ttl(self):
-        self.ttl = ttl + time.time()
+        self._ttl = ttl + time.time()
 
     def to_string(self) -> str:
         """
