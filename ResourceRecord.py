@@ -1,4 +1,5 @@
 # ResourceRecord definition
+import time
 
 class ResourceRecord:
     # Static variables
@@ -82,7 +83,7 @@ class ResourceRecord:
             self._name = name
             self._type = rr_type
             self._class = rr_class
-            self._ttl = ttl
+            self._ttl = ttl + time.time()
             self._rdata = rdata
             self._rdlength = len(self._rdata)
         else:
@@ -132,6 +133,9 @@ class ResourceRecord:
 
         # overall true
         return True
+    
+    def reset_ttl(self):
+        self.ttl = ttl + time.time()
 
     def to_string(self) -> str:
         """
