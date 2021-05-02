@@ -25,6 +25,7 @@ def parse_cli_args():
                         help="Our evil IP address that we want the victim to reach")
     parser.add_argument("-l", "--local",
                         nargs=1,
+                        metavar="TRUE",
                         dest="local",
                         help="Use this option if this script is run locally")
     return parser.parse_args()
