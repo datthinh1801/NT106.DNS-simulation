@@ -1,8 +1,10 @@
 import socket
+import time
 from Message import Message
 from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
 from ParseString import parse_string_msg
+from ParseString import parse_string_question
 from Cache import Cache
 
 class Resolver():
@@ -50,22 +52,41 @@ class Resolver():
 
         return response    
 
+    def check_qname(self, message:MessageQuestion = None):
+        check = message._qname
+        len_c = len(check)
+        if(check[len_c- 1 ]) != '.':
+            new = check + "."
+        else:
+            new = check
+        message._qname = new
+
     def query(self, message:str = None, tcp=False, source="127.0.0.1", source_port=20001):
 
-        message_query = parse_string_msg(message)
-        message_question = message_query._question
+        #message_query = parse_string_msg(message)
+        #message_question = message_query._question
+        message_question = parse_string_question(message)
 
-        rr = self.Cache.get(message_question)
+        self.check_qname(message_question)
+
+        message_info = (message_question._qname, message_question._qtype, message_question._qclass)
+
+        # print(message_info)
+
+        rr = self.Cache.get(message_info)
         if not rr is None:
-                print("in cache")
-                return rr 
-        # if cache contain answer -> return else broadcast namesever
+            print("search in cache")
+            return rr 
+
+        header = MessageHeader(qr=0,rd=True,ra=True)
+        message = Message(header=header,question=message_question)
+        message_query_str = message.to_string()
 
         #request
         if self.nameservers is None:
             self.nameservers = ['127.0.0.1']
 
-        request = message
+        request = message_query_str
         response = None
         while response is None:
             if tcp:
@@ -75,14 +96,14 @@ class Resolver():
             if not response is None:
                 break
         
-
+        # print("respones: ",response)
         message_answer = parse_string_msg(response)
         
         #print(response)
         # save to cache
         self.Save_to_Cache(message_answer)
         
-        rr = message_answer._answer
+        rr = message_answer._answer[0]
         # print("test cache")
         # print((rr[0]._name, rr[0]._type, rr[0]._class))
         # print(self.Cache.get( (rr[0]._name, rr[0]._type, rr[0]._class) ).to_string() )
@@ -94,41 +115,41 @@ class Resolver():
         authoritys = message_reponse._authority
         additionals = message_reponse._additional
 
-        self.Cache.put((answers[0]._name, answers[0]._type, answers[0]._class), answers[0])
+        self.Cache.put( (answers[0]._name, answers[0]._type, answers[0]._class), answers[0])
         """
+        # add answer
         for answer in answers:
-            #print(type(answer))
-            print(answer.to_string(), "---save to cache---")
             self.Cache.put( (answer._name, answer._type, answer._class), answer)
-
-            print(self.Cache.get( (answer._name, answer._type, answer._class) ).to_string(), "---print in cache---")
-        """
         #add authority
         for authority in authoritys:
-            #print(type(authority))
             self.Cache.put( (authority._name, authority._type, authority._class), authority )
             
         #add additional
         for additional in additionals:
-            #print(type(additional))
             self.Cache.put( (additional._name, additional._typy, additional._class), additional )
+        """
 
-        #print(self.Cache.get((answers[0]._name, answers[0]._type, answers[0]._class)).to_string())
-
-
-
+"""
 header = MessageHeader(qr=0,rd=True,ra=True)
 domain_resolve = input('Enter a domain name to resolve: ')
 question = MessageQuestion(domain_resolve,qtype=1,qclass=1)
-message = Message(header=header,question=question)
-message_query_str = message.to_string()
+mes_question = question.to_string()
 
 #print(message_query_str)
 rsv = Resolver()
-rr = rsv.query(message_query_str,0,"127.0.0.1",20001)
+rr = rsv.query(mes_question,0,"127.0.0.1",20001)
+# rr2 = rsv.query(mes_question,0,"127.0.0.1",20001)
 #print(type(rr))
-print(rr[0].to_string())
+print(rr.to_string())
+# print(rr2[0].to_string())
 
 #print(question)
+print("check in cache")
 print(rsv.Cache.get( ("fb.com",1,1) ))
 print(rsv.Cache.get( ("fb.com.",1,1)).to_string())
+time.sleep(3)
+
+print("search 2nd")
+rr2 = rsv.query(mes_question,0,"127.0.0.1",20001)
+print(rr2.to_string())
+"""
