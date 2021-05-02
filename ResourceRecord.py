@@ -7,7 +7,7 @@ class ResourceRecord:
     TYPE = {"A": 1, "NS": 2, "CNAME": 5, "SOA": 6, "WKS": 11,
             "PTR": 12, "HINFO": 13, "MX": 15, "TXT": 16}
     CLASS = {"IN": 1, "CH": 3, "HS": 4}
-    
+
     INV_RRTYPE = {1: "A", 2: "NS", 5: "CNAME", 6: "SOA", 11: "WKS",
             12: "PTR", 13: "HINFO", 15: "MX", 16: "TXT"}
     
@@ -83,9 +83,10 @@ class ResourceRecord:
             self._name = name
             self._type = rr_type
             self._class = rr_class
-            self._ttl = ttl + time.time()
+            self._ttl = ttl
             self._rdata = rdata
             self._rdlength = len(self._rdata)
+            self._ttd = time.time() + self._ttl
         else:
             self._name = None
             self._type = None
@@ -93,6 +94,7 @@ class ResourceRecord:
             self._ttl = None
             self._rdlength = None
             self._rdata = None
+            self._ttd = None
             raise Exception("Argument Exception")
 
     def _check_data_type_(self, *args, dtype: str) -> bool:
@@ -134,8 +136,8 @@ class ResourceRecord:
         # overall true
         return True
     
-    def reset_ttl(self):
-        self.ttl = ttl + time.time()
+    def reset_ttd(self):
+        self._ttd = time.time() + self._ttl
 
     def to_string(self) -> str:
         """
@@ -144,3 +146,5 @@ class ResourceRecord:
         #1 <hostname>;<type>;<class>;<ttl>;<value>
         """
         return self._name + ";" + str(self._type) + ";" + str(self._class) + ";" + str(self._ttl) + ";" + self._rdata
+
+
