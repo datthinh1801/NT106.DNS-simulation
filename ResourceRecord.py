@@ -136,8 +136,6 @@ class ResourceRecord:
         # overall true
         return True
     
-    def reset_ttd(self):
-        self._ttd = time.time() + self._ttl
 
     def to_string(self) -> str:
         """
