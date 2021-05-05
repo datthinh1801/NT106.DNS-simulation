@@ -4,21 +4,19 @@ from ResourceRecord import ResourceRecord
 
 class MessageQuestion:
     # Static variables
-    # These string keys will be covnerted to integers in transmission
     QTYPE = dict(ResourceRecord.TYPE)
     QTYPE.update(
         {"AXFR": 252, "MAILB": 253, "MAILA": 254, "*": 255})
 
     QCLASS = dict(ResourceRecord.CLASS)
     QCLASS.update({"*": 255})
-    
+
     INV_QTYPE = dict(ResourceRecord.INV_RRTYPE)
     INV_QTYPE.update(
         {252: "AXFR", 253: "MAILB", 254: "MAILA", 255: "*"})
-    
+
     INV_QCLASS = dict(ResourceRecord.INV_RRCLASS)
     INV_QCLASS.update({255: "*"})
-
 
     def __init__(self, qname: str, qtype: int, qclass: int):
         """
@@ -69,7 +67,8 @@ class MessageQuestion:
             self._qtype = None
             self._qclass = None
 
-    def _check_data_type_(self, *args, dtype: str) -> bool:
+    @staticmethod
+    def _check_data_type_(*args, dtype: str) -> bool:
         """Check if variables are of dtype."""
         for arg in args:
             if str(type(arg)) != f"<class '{dtype}'>":
@@ -105,9 +104,9 @@ class MessageQuestion:
         # overall true
         return True
 
-    def is_None(self) -> bool:
+    def is_none(self) -> bool:
         """Return True if this is a None-type MessageQuestion."""
-        return self._qname == None
+        return self._qname is None
 
     def to_string(self) -> str:
         """
@@ -116,3 +115,19 @@ class MessageQuestion:
         #1 <hostname>;<qtype>;<qclass>
         """
         return self._qname + ";" + str(self._qtype) + ";" + str(self._qclass)
+
+    def get_qname(self):
+        """Return qname."""
+        return self._qname
+
+    def get_qtype(self):
+        """Return qtype."""
+        return self._qtype
+
+    def get_qclass(self):
+        """Return qclass."""
+        return self._qclass
+
+    qname = property(get_qname)
+    qtype = property(get_qtype)
+    qclass = property(get_qclass)
