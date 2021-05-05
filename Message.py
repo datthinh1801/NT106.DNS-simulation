@@ -4,6 +4,7 @@ from MessageQuestion import MessageQuestion
 from ResourceRecord import ResourceRecord
 from copy import copy
 
+
 #########################################
 #                 NOTE                  #
 #########################################
@@ -17,7 +18,7 @@ class Message:
         Initialize a Message.
 
         Parameters:
-        request         -> [Response Only] The request that this Message will reply to.
+        request         -> [Response Only] The request Message object that this Message will reply to.
                            This will copy the Question section and the Header section from the request to the response.
         header          -> [Request Only] The header section of the message.
         question        -> [Request Only] The question section of the message.
@@ -36,11 +37,11 @@ class Message:
         self._authority = []
         self._additional = []
 
-        if request != None:
-            self._header = copy(request._header)
-            self._question = copy(request._question)
+        if request is not None:
+            self._header = copy(request.header)
+            self._question = copy(request.question)
             self.set_header_flags(qr=1)
-        elif header != None and question != None:
+        elif header is not None and question is not None:
             self._header = copy(header)
             self._question = copy(question)
         else:
@@ -60,8 +61,8 @@ class Message:
         - ARCOUNT
         """
         # Check Question section and set related flags
-        if self._question.is_None():
-            self._header.set_rcode(1)   # Format error
+        if self._question.is_none():
+            self._header.set_rcode(1)  # Format error
         else:
             self._header.set_count("qd", 1)
 
@@ -82,13 +83,13 @@ class Message:
         #Remaining lines are the numbers of records of each section
         """
         msg = ""
-        msg += self._header.to_string() + "\n"
-        msg += self._question.to_string() + "\n"
-        for record in self._answer:
+        msg += self.header.to_string() + "\n"
+        msg += self.question.to_string() + "\n"
+        for record in self.answers:
             msg += record.to_string() + "\n"
-        for record in self._authority:
+        for record in self.authorities:
             msg += record.to_string() + "\n"
-        for record in self._additional:
+        for record in self.additional:
             msg += record.to_string() + "\n"
         return msg
 
@@ -107,26 +108,27 @@ class Message:
         self._additional.append(record)
         self._set_header_flags_automatically()
 
-    def set_header_flags(self, qr: int = None, opcode: int = None, aa: bool = None, tc: bool = None, rd: bool = None, ra: bool = None, rcode: int = None):
+    def set_header_flags(self, qr: int = None, opcode: int = None, aa: bool = None, tc: bool = None, rd: bool = None,
+                         ra: bool = None, rcode: int = None):
         """
         Set specified header's flags.
         flag=None means not affected.
         """
         self._set_header_flags_automatically()
 
-        if qr != None:
+        if qr is not None:
             self._header.set_qr_flag()
-        if opcode != None:
+        if opcode is not None:
             self._header.set_opcode(opcode)
-        if aa != None and aa == True:
+        if aa is not None and aa is True:
             self._header.set_authoritative_flag()
-        if tc != None and tc == True:
+        if tc is not None and tc is True:
             self._header.set_truncate_flag()
-        if rd != None and rd == False:
+        if rd is not None and rd is False:
             self._header.clear_recursion_desire_flag()
-        if ra != None and ra == False:
+        if ra is not None and ra is False:
             self._header.clear_recursion_available_flag()
-        if rcode != None:
+        if rcode is not None:
             self._header.set_rcode(rcode)
 
     def get_answer_records(self):
@@ -138,5 +140,23 @@ class Message:
         return copy(self._authority)
 
     def get_additional_records(self):
-        """Return a copy of the list of ResourceRecords in the Addtional section."""
+        """Return a copy of the list of ResourceRecords in the Additional section."""
         return copy(self._additional)
+
+    def get_header(self):
+        """Return a copy of the header of the message."""
+        return copy(self._header)
+
+    def get_question(self):
+        """Return a copy of the question of the message."""
+        return copy(self._question)
+
+    """
+    Using property feature to ease the protected property access.
+    From now, we can use self.header to get a copy of the header instead of invoking the get_header() method.
+    """
+    header = property(get_header)
+    question = property(get_question)
+    answers = property(get_answer_records)
+    authorities = property(get_authority_records)
+    additional = property(get_additional_records)

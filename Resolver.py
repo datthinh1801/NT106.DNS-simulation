@@ -2,69 +2,79 @@ import socket
 from Message import Message
 from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
+from ResourceRecord import ResourceRecord
 from ParseString import parse_string_msg
-from Cache import Cache
+from CacheSystem import CacheSystem
+from configurator import Configurator
 
-class Resolver():
+
+class Resolver:
     def __init__(self):
-        self.nameservers = []
-        #self.timeout = 2.0
-        self.Cache = Cache()
+        """Initialize a Resolver."""
+        self.cache_system = CacheSystem()
+        Configurator.config_resolver(9393, 9292)
 
-    def use_tcp(self, messae:str = None, resolver_ip:str = "127.0.0.1" , resolver_port:int = 10000) -> str :
-        # Create a TCP socket at client side
-        TCPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = (resolver_ip, resolver_port)
-        TCPClientSocket.connect(server_address)
+    @staticmethod
+    def use_tcp(message: str) -> str:
+        """
+        Create a TCP connection to server, then send the message.
+        If there is an error while sending and receiving the message, an exception will be returned.
+        """
+        tcp_resolver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address = (Configurator.SERVER_IP, Configurator.SERVER_TCP_PORT)
+        tcp_resolver_socket.connect(server_address)
 
         try:
             # Sending data
-            bytesToSend = message.encode('utf-8')
-            TCPClientSocket.sendall(bytesToSend)
+            bytes_to_send = message.encode('utf-8')
+            tcp_resolver_socket.sendall(bytes_to_send)
 
-            #bufferSize = 2048 trong constant
-
-            #receiving data
-            data_Respond = TCPClientSocket.recv(bufferSize)
-            response = data_Respond.decode('utf-8')
+            # receiving data
+            response = tcp_resolver_socket.recv(Configurator.BUFFER_SIZE).decode('utf-8')
+        except Exception as e:
+            response = str(e)
         finally:
-            TCPClientSocket.close()
+            tcp_resolver_socket.close()
             return response
 
-    def use_udp(self, message:str = None, resolver_ip:str = "127.0.0.1" , resolver_port:int = 20001) -> str :
-        bytesToSend =  str.encode(message)
-        serverAddressPort = (resolver_ip, resolver_port)
-        bufferSize = 2048
+    @staticmethod
+    def use_udp(message: str) -> str:
+        """
+        Create a UDP connection to server, then send the message.
+        If there is an error while sending and receiving the message, an exception will be returned.
+        """
+        bytes_to_send = message.encode('utf-8')
+        server_address = (Configurator.SERVER_IP, Configurator.SERVER_UDP_PORT)
 
-       # Create a UDP socket at client side
-        UDP_Client_Socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-        # Send to server using created UDP socket
-        UDP_Client_Socket.sendto(bytesToSend, serverAddressPort)
-        #receiving data
-        data_Response = UDP_Client_Socket.recvfrom(bufferSize)
+        # Create a UDP socket at client side
+        udp_resolver_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-        #response = data_Respond[0].decode('utf-8')
-        response = "Message from Server {}".format(data_Response[0].decode('utf-8'))
+        try:
+            # Send data
+            udp_resolver_socket.sendto(bytes_to_send, server_address)
 
-        UDP_Client_Socket.close()
+            # Receiving data & convert bytes of data to a string
+            response = udp_resolver_socket.recvfrom(Configurator.BUFFER_SIZE)[0].decode('utf-8')
+        except Exception as e:
+            response = str(e)
+        finally:
+            udp_resolver_socket.close()
+            return response
 
-        return response    
-
-    def query(self, message:str = None, tcp=False, source="127.0.0.1", source_port=20001):
-
+    def query(self, message: str, tcp: bool = False) -> str:
+        # Create a Message query from a given string message
         message_query = parse_string_msg(message)
-        message_question = message_query._question
+        message_question = message_query.question
 
-        rr = self.Cache.get(message_question)
-        if not rr is None:
-                print("in cache")
-                return rr 
-        # if cache contain answer -> return else broadcast namesever
+        cached_record = self.cache_system.get(name=message_question.qname, rr_type=message_question.qtype,
+                                              rr_class=message_question.qclass)
+        # If an answer record for the query is already cached,
+        # return the record
+        if cached_record is not None:
+            # print("in cache")
+            return cached_record.to_string()
 
-        #request
-        if self.nameservers is None:
-            self.nameservers = ['127.0.0.1']
-
+        # Otherwise, send the query to the NameServer
         request = message
         response = None
         while response is None:
@@ -72,63 +82,24 @@ class Resolver():
                 response = self.use_tcp(request)
             else:
                 response = self.use_udp(request)
-            if not response is None:
-                break
-        
 
-        message_answer = parse_string_msg(response)
-        
-        #print(response)
+        if response.split("-")[0] == "Failed":
+            return response.split("-")[1]
+        else:
+            message_answer = parse_string_msg(response)
+
         # save to cache
-        self.Save_to_Cache(message_answer)
-        
-        rr = message_answer._answer
-        # print("test cache")
-        # print((rr[0]._name, rr[0]._type, rr[0]._class))
-        # print(self.Cache.get( (rr[0]._name, rr[0]._type, rr[0]._class) ).to_string() )
-        # return ResoucrRecord answer
-        return rr
+        self.save_to_cache_system(message_answer)
 
-    def Save_to_Cache(self, message_reponse:Message = None):
-        answers = message_reponse._answer
-        authoritys = message_reponse._authority
-        additionals = message_reponse._additional
+        first_rr = message_answer.answers[0]
+        return first_rr.to_string()
 
-        self.Cache.put((answers[0]._name, answers[0]._type, answers[0]._class), answers[0])
-        """
-        for answer in answers:
-            #print(type(answer))
-            print(answer.to_string(), "---save to cache---")
-            self.Cache.put( (answer._name, answer._type, answer._class), answer)
+    def save_to_cache_system(self, message_response: Message):
+        for answer in message_response.answers:
+            self.cache_system.put(answer)
 
-            print(self.Cache.get( (answer._name, answer._type, answer._class) ).to_string(), "---print in cache---")
-        """
-        #add authority
-        for authority in authoritys:
-            #print(type(authority))
-            self.Cache.put( (authority._name, authority._type, authority._class), authority )
-            
-        #add additional
-        for additional in additionals:
-            #print(type(additional))
-            self.Cache.put( (additional._name, additional._typy, additional._class), additional )
+        for authority in message_response.authorities:
+            self.cache_system.put(authority)
 
-        #print(self.Cache.get((answers[0]._name, answers[0]._type, answers[0]._class)).to_string())
-
-
-
-header = MessageHeader(qr=0,rd=True,ra=True)
-domain_resolve = input('Enter a domain name to resolve: ')
-question = MessageQuestion(domain_resolve,qtype=1,qclass=1)
-message = Message(header=header,question=question)
-message_query_str = message.to_string()
-
-#print(message_query_str)
-rsv = Resolver()
-rr = rsv.query(message_query_str,0,"127.0.0.1",20001)
-#print(type(rr))
-print(rr[0].to_string())
-
-#print(question)
-print(rsv.Cache.get( ("fb.com",1,1) ))
-print(rsv.Cache.get( ("fb.com.",1,1)).to_string())
+        for add in message_response.additional:
+            self.cache_system.put(add)

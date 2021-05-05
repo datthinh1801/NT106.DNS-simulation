@@ -3,7 +3,9 @@ import random
 
 
 class MessageHeader:
-    def __init__(self, id: int = None, qr: int = 0, opcode: int = 0, aa: bool = False, tc: bool = False, rd: bool = True, ra: bool = True, rcode: int = 0, qdcount: int = 0, ancount: int = 0, nscount: int = 0, arcount: int = 0):
+    def __init__(self, id: int = None, qr: int = 0, opcode: int = 0, aa: bool = False, tc: bool = False,
+                 rd: bool = True, ra: bool = True, rcode: int = 0, qdcount: int = 0, ancount: int = 0, nscount: int = 0,
+                 arcount: int = 0):
         """
         Initialize the header of a Message.
 
@@ -19,7 +21,7 @@ class MessageHeader:
         All other fields are initialized to 0.
         """
         # 16-bit identifier
-        self._id = random.randint(0, pow(2, 16) - 1) if id == None else id
+        self._id = random.randint(0, pow(2, 16) - 1) if id is None else id
         # 1-bit flag specifies if this Message is a query (0) or a response (1)
         self._qr = qr
         # 4-bit flag (values range from 0 to 15) specifies the kind of query
@@ -32,7 +34,7 @@ class MessageHeader:
         self._rd = rd
         # [Recursive Available] 1-bit flag specifies if the name server supports recursive query
         self._ra = ra
-        # Reserved for future use, must be 0 in all Messasges
+        # Reserved for future use, must be 0 in all Messages
         self._z = 0
         # [Response code] 4-bit field specifies error
         self._rcode = rcode
@@ -55,7 +57,7 @@ class MessageHeader:
         0 -> Standard query (QUERY)
         1 -> Inverse query  (IQUERY)
         2 -> Server status request (STATUS)
-        3-15 -> Reseverd for future use
+        3-15 -> Reserved for future use
         """
         if code in [0, 15]:
             self._opcode = code
@@ -148,3 +150,52 @@ class MessageHeader:
         string += str(self._nscount) + "\n"
         string += str(self._arcount)
         return string
+
+    def get_id(self):
+        return self._id
+
+    def get_qr(self):
+        return self._qr
+
+    def get_opcode(self):
+        return self._opcode
+
+    def get_aa(self):
+        return self._aa
+
+    def get_tc(self):
+        return self._tc
+
+    def get_rd(self):
+        return self._rd
+
+    def get_ra(self):
+        return self._ra
+
+    def get_rcode(self):
+        return self._rcode
+
+    def get_qdcount(self):
+        return self._qdcount
+
+    def get_ancount(self):
+        return self._ancount
+
+    def get_nscount(self):
+        return self._nscount
+
+    def get_arcount(self):
+        return self._arcount
+
+    id = property(get_id)
+    qr = property(get_qr)
+    opcode = property(get_opcode)
+    aa = property(get_aa)
+    tc = property(get_tc)
+    rd = property(get_rd)
+    ra = property(get_ra)
+    rcode = property(get_rcode)
+    qdcount = property(get_qdcount)
+    ancount = property(get_ancount)
+    nscount = property(get_nscount)
+    arcount = property(get_arcount)

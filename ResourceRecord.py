@@ -1,17 +1,13 @@
-# ResourceRecord definition
-import time
-
 class ResourceRecord:
     # Static variables
-    # These string keys will be converted to integers in transmission
     TYPE = {"A": 1, "NS": 2, "CNAME": 5, "SOA": 6, "WKS": 11,
             "PTR": 12, "HINFO": 13, "MX": 15, "TXT": 16}
     CLASS = {"IN": 1, "CH": 3, "HS": 4}
-    
+
     INV_RRTYPE = {1: "A", 2: "NS", 5: "CNAME", 6: "SOA", 11: "WKS",
-            12: "PTR", 13: "HINFO", 15: "MX", 16: "TXT"}
-    
-    INV_RRCLASS = {1: "IN", 3: "CH", 4:"HS"}
+                  12: "PTR", 13: "HINFO", 15: "MX", 16: "TXT"}
+
+    INV_RRCLASS = {1: "IN", 3: "CH", 4: "HS"}
 
     def __init__(self, name: str, rr_type: int, rr_class: int, ttl: int, rdata: str):
         """
@@ -23,6 +19,8 @@ class ResourceRecord:
         rr_class    -> 2 bytes of the RR CLASS code
         ttl         -> a 32 bit signed integer specifies the cache interval of this RR. 0 means do not cache
         rdata       -> data of corresponding query type
+
+        [Alert] If some given parameters are invalid, the constructor will raise an Argument Exception.
 
         type:
         ._______________________.
@@ -83,7 +81,7 @@ class ResourceRecord:
             self._name = name
             self._type = rr_type
             self._class = rr_class
-            self._ttl = ttl + time.time()
+            self._ttl = ttl
             self._rdata = rdata
             self._rdlength = len(self._rdata)
         else:
@@ -93,9 +91,10 @@ class ResourceRecord:
             self._ttl = None
             self._rdlength = None
             self._rdata = None
-            raise Exception("Argument Exception")
+            raise Exception("Argument Exception while constructing a ResourceRecord object.")
 
-    def _check_data_type_(self, *args, dtype: str) -> bool:
+    @staticmethod
+    def _check_data_type_(*args, dtype: str) -> bool:
         """Check if variables are of dtype."""
         for arg in args:
             if str(type(arg)) != f"<class '{dtype}'>":
@@ -133,9 +132,6 @@ class ResourceRecord:
 
         # overall true
         return True
-    
-    def reset_ttl(self):
-        self._ttl = ttl + time.time()
 
     def to_string(self) -> str:
         """
@@ -144,3 +140,36 @@ class ResourceRecord:
         #1 <hostname>;<type>;<class>;<ttl>;<value>
         """
         return self._name + ";" + str(self._type) + ";" + str(self._class) + ";" + str(self._ttl) + ";" + self._rdata
+
+    def get_name(self):
+        """Return the name of the record."""
+        return self._name
+
+    def get_type(self):
+        """Return the type of the record"""
+        return self._type
+
+    def get_class(self):
+        """Return the class of the record."""
+        return self._class
+
+    def get_ttl(self):
+        """Return the ttl of the record."""
+        return self._ttl
+
+    def get_data(self):
+        """Return the value of the record."""
+        return self._rdata
+
+    name = property(get_name)
+    rr_type = property(get_type)
+    rr_class = property(get_class)
+    ttl = property(get_ttl)
+    rdata = property(get_data)
+
+    def __eq__(self, other):
+        """Compare whether this ResourceRecord is equal to the other ResourceRecord."""
+        if self.name == other.name and self.rr_type == other.rr_type and \
+                self.rr_class == other.rr_class:
+            return True
+        return False
