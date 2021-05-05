@@ -3,14 +3,14 @@ from Message import Message
 from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
 from ParseString import parse_string_msg
-from Cache import Cache
+from CacheSystem import CacheSystem
 
 
 class Resolver():
     def __init__(self):
         self.nameservers = []
         #self.timeout = 2.0
-        self.Cache = Cache()
+        self.Cache = CacheSystem()
 
     def use_tcp(self, message: str = None, resolver_ip: str = "127.0.0.1", resolver_port: int = 9999) -> str:
         # Create a TCP socket at client side
@@ -59,10 +59,11 @@ class Resolver():
         message_query = parse_string_msg(message)
         message_question = message_query._question
 
-        rr = self.Cache.get(message_question)
-        if not rr is None:
+        cache_find = self.Cache.get(
+            (message_question._qname, message_question._qtype, message_question._qclass))
+        if cache_find is not None:
             print("in cache")
-            return rr
+            return cache_find.to_string()
         # if cache contain answer -> return else broadcast namesever
 
         # request
@@ -85,7 +86,7 @@ class Resolver():
         message_answer = parse_string_msg(response)
 
         # save to cache
-        self.Save_to_Cache(message_answer)
+        self.Cache.Save_to_Cache(message_answer)
 
         rr = message_answer._answer
         # print("test cache")
@@ -98,17 +99,10 @@ class Resolver():
         answers = message_reponse._answer
         authoritys = message_reponse._authority
         additionals = message_reponse._additional
-
-        self.Cache.put(
-            (answers[0]._name, answers[0]._type, answers[0]._class), answers[0])
-        """
         for answer in answers:
-            #print(type(answer))
-            print(answer.to_string(), "---save to cache---")
-            self.Cache.put( (answer._name, answer._type, answer._class), answer)
+            self.Cache.put(
+                (answer._name.rstrip('.'), answer._type, answer._class), answer)
 
-            print(self.Cache.get( (answer._name, answer._type, answer._class) ).to_string(), "---print in cache---")
-        """
         # add authority
         for authority in authoritys:
             # print(type(authority))
@@ -121,12 +115,10 @@ class Resolver():
             self.Cache.put((additional._name, additional._typy,
                            additional._class), additional)
 
-        #print(self.Cache.get((answers[0]._name, answers[0]._type, answers[0]._class)).to_string())
-
 
 header = MessageHeader(qr=0, rd=True, ra=True)
 domain_resolve = input('Enter a domain name to resolve: ')
-#domain_resolve = "facebook.com"
+#domain_resolve = "faceb123123ook.com"
 question = MessageQuestion(domain_resolve, qtype=1, qclass=1)
 message = Message(header=header, question=question)
 message_query_str = message.to_string()
@@ -134,10 +126,11 @@ message_query_str = message.to_string()
 # print(message_query_str)
 rsv = Resolver()
 rr_udp = rsv.query(message_query_str, 0, "127.0.0.1", 20000)
-rr_tcp = rsv.query(message_query_str, 1, "127.0.0.1", 9999)
+
 print("udp receive: ", rr_udp)
 print()
 print()
+rr_tcp = rsv.query(message_query_str, 1, "127.0.0.1", 9999)
 print("tcp receive: ", rr_tcp)
 
 # #print(question)

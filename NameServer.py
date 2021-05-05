@@ -7,6 +7,7 @@ import dns.zone
 import dns.resolver
 import dns.exception
 import threading
+from CacheSystem import CacheSystem
 
 import socket
 from ParseString import parse_string_msg
@@ -32,8 +33,8 @@ class NameServer:
         Receive the query from resolver in raw text format and Parse raw text to Messages Object
         to handle the query then send respone or continously send query to other zonr( recursive-query)
         """
-        self.__zone = None
-        self.__cache = Cache
+        self.ZONE = None
+        self.CACHE = CacheSystem()
 
     def Query_handle(self, query_message: Message = None) -> Message:
         # query qr == 0 ? qr == 1
@@ -43,7 +44,6 @@ class NameServer:
             if header._rd == True:
                 message_answer = self.Recursive_query(query_message)
                 return message_answer
-                # hanle wrong answer ... !!!! (  not implement yet )
             else:
                 answer = self.Non_Recursive_query(header, question)
 
@@ -117,6 +117,7 @@ class NameServer:
         response_message = self.Convert_response_answer_to_response_message(
             resolve_query.response, message_query)
 
+        self.CACHE.Save_to_Cache(response_message)
         return response_message
 
     def start_listening_TCP(self):
@@ -140,12 +141,31 @@ class NameServer:
                 data_receive = byteData.decode('utf-8')
                 if data_receive:
                     message_query = parse_string_msg(data_receive)
-                    message_result = self.Query_handle(message_query)
+
+                    print("\n-----")
+                    print("request: ", data_receive)
+
+                    # message question
+                    msg_question = message_query._question
+                    # find in cache first
+                    cache_find = self.CACHE.get(
+                        (msg_question._qname, msg_question._qtype, msg_question._qclass))
+                    if cache_find is not None:
+                        print("in cache")
+                        message_result = Message(message_query)
+                        message_result.add_a_new_record_to_answer_section(
+                            cache_find)
+                    else:
+                        message_result = self.Query_handle(message_query)
                     # send back the result to resolver here
 
                     if type(message_result) != type("string"):
                         message_result = message_result.to_string()
 
+
+                    print("response: ", message_result)
+                    print("-----\n")
+                    
                     response = str.encode(message_result)
                     connection.sendall(response)
                 else:
@@ -170,14 +190,31 @@ class NameServer:
             client_address = byteData[1]
             if data_receive:
                 message_query = parse_string_msg(data_receive)
-                message_result = self.Query_handle(message_query)
+                print("\n-----")
+                print("request: ", data_receive)
+
+                # message question
+                msg_question = message_query._question
+                # find in cache first
+                cache_find = self.CACHE.get(
+                    (msg_question._qname, msg_question._qtype, msg_question._qclass))
+
+                if cache_find is not None:
+                    print("in cache")
+                    message_result = Message(message_query)
+                    message_result.add_a_new_record_to_answer_section(
+                        cache_find)
+                else:
+                    message_result = self.Query_handle(message_query)
                 # send back the result to resolver here
                 if type(message_result) != type("string"):
                     message_result = message_result.to_string()
                 response = str.encode(message_result)
-
                 if type(message_result) != type("string"):
                     message_result = message_result.to_string()
+                
+                print("response: ", message_result)
+                print("-----\n")
                 sock.sendto(response, client_address)
         print("disconnect")
 
