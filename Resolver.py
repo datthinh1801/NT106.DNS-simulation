@@ -42,11 +42,12 @@ class Resolver():
             family=socket.AF_INET, type=socket.SOCK_DGRAM)
         # Send to server using created UDP socket
         UDP_Client_Socket.sendto(bytesToSend, serverAddressPort)
+
         # receiving data
         data_Response = UDP_Client_Socket.recvfrom(bufferSize)
 
         #response = data_Respond[0].decode('utf-8')
-        response = "Message from Server {}".format(
+        response = "{}".format(
             data_Response[0].decode('utf-8'))
 
         UDP_Client_Socket.close()
@@ -78,6 +79,9 @@ class Resolver():
             if not response is None:
                 break
 
+        if response.split("-")[0] == "Failed":
+            return response.split("-")[1]
+
         message_answer = parse_string_msg(response)
 
         # save to cache
@@ -88,7 +92,7 @@ class Resolver():
         # print((rr[0]._name, rr[0]._type, rr[0]._class))
         # print(self.Cache.get( (rr[0]._name, rr[0]._type, rr[0]._class) ).to_string() )
         # return ResoucrRecord answer
-        return message_answer
+        return message_answer.to_string()
 
     def Save_to_Cache(self, message_reponse: Message = None):
         answers = message_reponse._answer
@@ -121,8 +125,8 @@ class Resolver():
 
 
 header = MessageHeader(qr=0, rd=True, ra=True)
-# domain_resolve = input('Enter a domain name to resolve: ')
-domain_resolve = "facebook.com"
+domain_resolve = input('Enter a domain name to resolve: ')
+#domain_resolve = "facebook.com"
 question = MessageQuestion(domain_resolve, qtype=1, qclass=1)
 message = Message(header=header, question=question)
 message_query_str = message.to_string()
@@ -131,11 +135,10 @@ message_query_str = message.to_string()
 rsv = Resolver()
 rr_udp = rsv.query(message_query_str, 0, "127.0.0.1", 20000)
 rr_tcp = rsv.query(message_query_str, 1, "127.0.0.1", 9999)
-
-print("udp receive: ",rr_udp.to_string())
+print("udp receive: ", rr_udp)
 print()
 print()
-print("tcp receive: ",rr_tcp.to_string())
+print("tcp receive: ", rr_tcp)
 
 # #print(question)
 # print(rsv.Cache.get( ("fb.com",1,1) ))

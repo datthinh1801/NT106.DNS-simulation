@@ -5,6 +5,7 @@ from ResourceRecord import ResourceRecord
 import dns.query
 import dns.zone
 import dns.resolver
+import dns.exception
 import threading
 
 import socket
@@ -28,7 +29,7 @@ def Get_key_from_values(dicts: dict = None, key=None):
 class NameServer:
     def __init__(self, Cache: bool = False):
         """
-        Receive the query from resolver in raw text format and Parse raw text to Messages Object 
+        Receive the query from resolver in raw text format and Parse raw text to Messages Object
         to handle the query then send respone or continously send query to other zonr( recursive-query)
         """
         self.__zone = None
@@ -101,8 +102,13 @@ class NameServer:
         qtype = message_query._question._qtype
         resolver = dns.resolver.Resolver()
         resolver.nameservers = ['8.8.8.8']
-        resolve_query = resolver.resolve(qname, Get_key_from_values(
-            QTYPE, qtype), raise_on_no_answer=False)
+        try:
+            resolve_query = resolver.resolve(qname, Get_key_from_values(
+                QTYPE, qtype), raise_on_no_answer=False)
+        except dns.exception.DNSException as e:
+            response_message = "Failed-" + str(e)
+            return response_message
+
         print("\n-----")
         print("request: ", message_query._question.to_string())
         print("response: ", resolve_query.response)
@@ -137,7 +143,10 @@ class NameServer:
                     message_result = self.Query_handle(message_query)
                     # send back the result to resolver here
 
-                    response = str.encode(message_result.to_string())
+                    if type(message_result) != type("string"):
+                        message_result = message_result.to_string()
+
+                    response = str.encode(message_result)
                     connection.sendall(response)
                 else:
                     break  # code more to print out error
@@ -163,8 +172,12 @@ class NameServer:
                 message_query = parse_string_msg(data_receive)
                 message_result = self.Query_handle(message_query)
                 # send back the result to resolver here
-                response = str.encode(message_result.to_string())
+                if type(message_result) != type("string"):
+                    message_result = message_result.to_string()
+                response = str.encode(message_result)
 
+                if type(message_result) != type("string"):
+                    message_result = message_result.to_string()
                 sock.sendto(response, client_address)
         print("disconnect")
 
