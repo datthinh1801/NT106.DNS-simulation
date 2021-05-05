@@ -133,3 +133,40 @@ def parse_string_msg(msg: str) -> Message:
 
 
     return message
+
+
+
+def Parse_string_key(key:str):
+    key = key.replace('(', '')
+    key = key.replace(')', '')
+    fields = key.split(',')
+
+    return (fields[0], int(fields[1]), int(fields[2]))
+
+def Parse_string_cache(cache:str) -> Cache_new:
+    fields = cache.split('+')
+    rr = parse_string_resource_record(fields[0])
+    ttd = int(fields[1])
+    cachenew = Cache_new()
+    cachenew._data = rr
+    cachenew._ttd = ttd
+
+    return cachenew
+
+def Parse_string_cache_system(cachesys:str) -> CacheSystem:
+    lines = cachesys.splitlines()
+    # lines = cachesys.split('\r\n')
+    cachesystem = CacheSystem()
+
+    cachesystem._refresh_time = int(lines[0])
+    cachesystem._refresh_time_next = int(lines[1])
+
+    for line in range(2,len(lines)):
+        print(lines[line])
+        fields = lines[line].split(':')
+        key = Parse_string_key(fields[0])
+        data = Parse_string_cache(fields[1])
+        cachesystem._data[key] = data
+
+    return cachesystem
+        

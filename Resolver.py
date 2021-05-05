@@ -4,12 +4,13 @@ from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
 from ParseString import parse_string_msg
 from CacheSystem import CacheSystem
+from ParseString import Parse_string_cache_system
 
 
 class Resolver():
     def __init__(self):
         self.nameservers = []
-        #self.timeout = 2.0
+        # self.timeout = 2.0
         self.Cache = CacheSystem()
 
     def use_tcp(self, message: str = None, resolver_ip: str = "127.0.0.1", resolver_port: int = 9999) -> str:
@@ -46,7 +47,7 @@ class Resolver():
         # receiving data
         data_Response = UDP_Client_Socket.recvfrom(bufferSize)
 
-        #response = data_Respond[0].decode('utf-8')
+        # response = data_Respond[0].decode('utf-8')
         response = "{}".format(
             data_Response[0].decode('utf-8'))
 
@@ -96,6 +97,9 @@ class Resolver():
         return message_answer.to_string()
 
     def Save_to_Cache(self, message_reponse: Message = None):
+        f = open("CacheSystem.txt", "w+")
+        self.Cache = Parse_string_cache_system(f)
+
         answers = message_reponse._answer
         authoritys = message_reponse._authority
         additionals = message_reponse._additional
@@ -114,11 +118,65 @@ class Resolver():
             # print(type(additional))
             self.Cache.put((additional._name, additional._typy,
                            additional._class), additional)
+        
+        cachesys = self.Cache.CacheSystem_to_string()
+        f.write(cachesys)
+        f.close()
+
+
+def Handle_cache_file(cachesys:CacheSystem = None):
+    f = open("CacheSystem.txt", "w+")
+    cachesys = 
+    
+
+
+
+def check_qname(self, message: MessageQuestion = None):
+         check = message._qname
+         len_c = len(check)
+         if(check[len_c - 1]) != '.':
+             new = check + "."
+         else:
+             new = check
+         message._qname = new
+
+
+def Handle_Input(domain: str = None):
+
+    if domain == "" or len(domain) > 255:
+        print("Domain name '",domain,"' is not exist.")
+        exit(0)
+    # check if hostname is not of the format label.label[.label[.label...]]
+    elif len(domain.split(".")) <= 1:
+        print("Domain name '",domain,"' is not exist.")
+        exit(0)
+    # if hostname is of valid format, check if any label of the hostname exceeds the size limit of 63 bytes
+    elif len(domain.split(".")) > 1:
+        for label in domain.split("."):
+            if len(label) > 63:
+                print("Domain name '",domain,"' is not exist.")
+                exit(0)
+
+    # check '.' at the end of domain
+    len_domain = len(domain)
+    if(domain[len_domain - 1]) != '.':
+        new_dm = domain + "."
+    else:
+        new_dm = domain
+    domain = new_dm
+
+    
+    
+
+
+    
+
 
 
 header = MessageHeader(qr=0, rd=True, ra=True)
 domain_resolve = input('Enter a domain name to resolve: ')
-#domain_resolve = "faceb123123ook.com"
+# domain_resolve = "faceb123123ook.com"
+# Handle_Input(domain_resolve)
 question = MessageQuestion(domain_resolve, qtype=1, qclass=1)
 message = Message(header=header, question=question)
 message_query_str = message.to_string()
