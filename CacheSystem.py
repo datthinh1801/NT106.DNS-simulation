@@ -92,7 +92,6 @@ def Parse_string_cache_system(cachesys:str) -> CacheSystem:
     cachesystem._refresh_time = int(lines[0])
     cachesystem._refresh_time_next = int(lines[1])
     for line in range(2,len(lines)):
-        print(lines[line])
         fields = lines[line].split(':')
         key = Parse_string_key(fields[0])
         cache = Parse_string_cache(fields[1])
