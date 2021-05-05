@@ -124,12 +124,6 @@ class Resolver():
         f.close()
 
 
-def Handle_cache_file(cachesys:CacheSystem = None):
-    f = open("CacheSystem.txt", "w+")
-    cachesys = 
-    
-
-
 
 def check_qname(self, message: MessageQuestion = None):
          check = message._qname

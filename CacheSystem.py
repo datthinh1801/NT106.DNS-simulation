@@ -69,12 +69,11 @@ class CacheSystem:
             cachesys += str(i) + ":"
             cachesys += cache.to_string() + "\r\n"
         return cachesys
-"""
+
 def Parse_string_key(key:str):
     key = key.replace('(', '')
     key = key.replace(')', '')
     fields = key.split(',')
-
     return (fields[0], int(fields[1]), int(fields[2]))
 
 def Parse_string_cache(cache:str) -> Cache_new:
@@ -84,26 +83,22 @@ def Parse_string_cache(cache:str) -> Cache_new:
     cachenew = Cache_new()
     cachenew._data = rr
     cachenew._ttd = ttd
-
     return cachenew
 
 def Parse_string_cache_system(cachesys:str) -> CacheSystem:
     lines = cachesys.splitlines()
     # lines = cachesys.split('\r\n')
     cachesystem = CacheSystem()
-
     cachesystem._refresh_time = int(lines[0])
     cachesystem._refresh_time_next = int(lines[1])
-
     for line in range(2,len(lines)):
         print(lines[line])
         fields = lines[line].split(':')
         key = Parse_string_key(fields[0])
-        data = Parse_string_cache(fields[1])
-        cachesystem._data[key] = data
-
+        cache = Parse_string_cache(fields[1])
+        cachesystem._data[key] = cache
     return cachesystem
-"""        
+
 
 
 
@@ -119,13 +114,15 @@ a.put(("bbb.com", 1, 1), RR2)
 a.put(("ccc.com", 1, 1), RR3)
 a.put(("ccc.", 1, 1), RR4)
 
-#print(a.get(("bbb.com", 1, 1)).to_string())
+print("--check in cache a--")
+print(a.get(("bbb.com", 1, 1)).to_string())
 
 string = a.CacheSystem_to_string()
 print(string)
 
 b = Parse_string_cache_system(string)
 
+print("--check in cache b--")
 print(b.get(("bbb.com", 1, 1)).to_string())
 
 """
