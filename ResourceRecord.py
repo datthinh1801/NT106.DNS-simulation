@@ -83,7 +83,7 @@ class ResourceRecord:
             self._name = name
             self._type = rr_type
             self._class = rr_class
-            self._ttl = ttl + time.time()
+            self._ttl = ttl 
             self._rdata = rdata
             self._rdlength = len(self._rdata)
         else:

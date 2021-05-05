@@ -5,6 +5,7 @@ from ResourceRecord import ResourceRecord
 import dns.query
 import dns.zone
 import dns.resolver
+import threading
 
 import socket
 from ParseString import parse_string_msg
@@ -60,15 +61,19 @@ class NameServer:
                 rr_class = RRs.rdclass
                 ttl = RRs.ttl
                 rdata = RRs[0]
-                resource_records = ResourceRecord(str(name), int(rr_type), int(rr_class), int(ttl), str(rdata))
+                resource_records = ResourceRecord(str(name), int(
+                    rr_type), int(rr_class), int(ttl), str(rdata))
                 if i == 1:
-                    message_response.add_a_new_record_to_answer_section(resource_records)
+                    message_response.add_a_new_record_to_answer_section(
+                        resource_records)
                 if i == 2:
                     for j in range(len(RRs)):
                         rdata = RRs[j]
-                        message_response.add_a_new_record_to_authority_section(ResourceRecord(str(name), int(rr_type), int(rr_class), int(ttl), str(rdata)))
+                        message_response.add_a_new_record_to_authority_section(ResourceRecord(
+                            str(name), int(rr_type), int(rr_class), int(ttl), str(rdata)))
                 if i == 3:
-                    message_response.add_a_new_record_to_additional_section(resource_records)
+                    message_response.add_a_new_record_to_additional_section(
+                        resource_records)
 
         # return message response
         return message_response
@@ -96,11 +101,15 @@ class NameServer:
         qtype = message_query._question._qtype
         resolver = dns.resolver.Resolver()
         resolver.nameservers = ['8.8.8.8']
-        resolve_query = resolver.resolve(qname, Get_key_from_values(QTYPE, qtype), raise_on_no_answer=False)
-        print("Resolver result: ")
-        print(resolve_query.response)
+        resolve_query = resolver.resolve(qname, Get_key_from_values(
+            QTYPE, qtype), raise_on_no_answer=False)
+        print("\n-----")
+        print("request: ", message_query._question.to_string())
+        print("response: ", resolve_query.response)
+        print("-----\n")
         # handle error query here
-        response_message = self.Convert_response_answer_to_response_message(resolve_query.response, message_query)
+        response_message = self.Convert_response_answer_to_response_message(
+            resolve_query.response, message_query)
 
         return response_message
 
@@ -114,31 +123,38 @@ class NameServer:
         sock.bind(server_address)
 
         # listen for incomming connections
+        print("TCP waiting...")
         sock.listen(0)
+
         while True:
             # wait for a connection
             connection, client_address = sock.accept()
             try:
                 byteData = connection.recv(buffersize)
-                data = byteData.decode('utf-9')
-                if data:
-                    message_query = parse_string_msg(data)
+                data_receive = byteData.decode('utf-8')
+                if data_receive:
+                    message_query = parse_string_msg(data_receive)
                     message_result = self.Query_handle(message_query)
                     # send back the result to resolver here
+
+                    response = str.encode(message_result.to_string())
+                    connection.sendall(response)
                 else:
-                    break  ##### code more to print out error
+                    break  # code more to print out error
             finally:
                 connection.close()
 
     def start_listening_UDP(self):
         # create a UDP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = ('localhost', 20001)
+        server_address = ('127.0.0.1', 20000)
         buffersize = 2048
 
         # bind the socket to the port
+        # sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) -> this is for overlap port
         sock.bind(server_address)
-        print("waiting...")
+        # sock.listen(1)
+        print("UDP waiting...")
         while True:
             byteData = sock.recvfrom(buffersize)
             data_receive = byteData[0].decode('utf-8')
@@ -151,6 +167,7 @@ class NameServer:
 
                 sock.sendto(response, client_address)
         print("disconnect")
+
 
 """
 .3.13. SOA RDATA format
@@ -203,11 +220,11 @@ EXPIRE          A 32 bit time value that specifies the upper limit on
 """
 
 name_sv = NameServer()
-# header = MessageHeader(qr=0,rd=True,ra=True)
-# question = MessageQuestion("www.facebook.com",qtype=1,qclass=1)
-# message = Message(header=header,question=question)
-# print("request: ",message._header.to_string())
-# response = name_sv.Query_handle(message)
 
-name_sv.start_listening_UDP()
 
+thr_udp = threading.Thread(target=name_sv.start_listening_UDP, args=())
+thr_udp.start()
+
+
+thr_tcp = threading.Thread(target=name_sv.start_listening_TCP, args=())
+thr_tcp.start()
