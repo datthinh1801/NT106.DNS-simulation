@@ -5,7 +5,7 @@ domain name will be written to an output file; otherwise, write out a "Timeout".
 """
 import argparse
 from socket import *
-from constants import RESOLVER_ADDR
+from configurator import Configurator
 
 
 def parse_args():
@@ -24,8 +24,7 @@ def parse_args():
     # Add the first argument as the domain name.
     # The value of this argument will be stored in the qname variable.
     parser.add_argument('-d', '--domain',
-                        action='store',
-                        nargs=1,
+                        nargs='?',
                         required=True,
                         help='the domain name to be queried',
                         metavar='QNAME',
@@ -64,23 +63,29 @@ def make_query(args_obj) -> str:
     client_socket.settimeout(1.0)
 
     # Prepare a message for transmission
-    msg = f"{args_obj.qname[0]};{args_obj.qtype};{args_obj.qclass}"
+    msg = f"{args_obj.qname};{args_obj.qtype};{args_obj.qclass}"
     # Send the message to the resolver
-    client_socket.sendto(msg.encode(), RESOLVER_ADDR)
+    resolver_address = (Configurator.RESOLVER_IP, Configurator.RESOLVER_UDP_PORT)
+    client_socket.sendto(msg.encode(), resolver_address)
+
     # Extract the response only
     response = client_socket.recvfrom(1024)[0]
     client_socket.close()
-    return response.decode() if response != None else None
+    return response.decode() if response is not None else None
 
 
 args = parse_args()
 
 # Catch socket.timeout exception
 try:
-    reponse = make_query(args)
+    response = make_query(args)
 except timeout:
-    reponse = "Timeout"
+    response = "[EXCEPTION] Timeout"
+except Exception as e:
+    response = "[EXCEPTION] " + str(e)
+finally:
+    print(response)
 
 # Write output to 'output.txt' file
-with open('output.txt', 'w') as f:
-    f.write(reponse)
+# with open('output.txt', 'w') as f:
+#     f.write(response)

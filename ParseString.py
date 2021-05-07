@@ -2,12 +2,13 @@ from Message import Message
 from MessageQuestion import MessageQuestion
 from MessageHeader import MessageHeader
 from ResourceRecord import ResourceRecord
-
+from Cache import Cache
+from CacheSystem import CacheSystem
 
 def parse_string_flag(flags: str) -> dict:
     """Parse a hex string of flags to a dictionary of flags with values converted properly."""
     # convert hex string to bin string
-    bin_str = bin(int(flags, 16))[2:]
+    bin_str = bin(int(flags, 16))[2:].rjust(16, "0")
 
     d_flags = dict()
     cur_bit_pos = 0
@@ -37,15 +38,12 @@ def parse_string_flag(flags: str) -> dict:
     cur_bit_pos += 1
 
     # get 3-bit Z
-    z_flg = bin_str[cur_bit_pos:cur_bit_pos+3]
-    if z_flg != '':
-        d_flags['z'] = int(bin_str[cur_bit_pos: cur_bit_pos + 3], 2)
-    else:
-        d_flags['z'] = 0
+    z_flg = bin_str[cur_bit_pos:cur_bit_pos + 3]
+    d_flags['z'] = int(z_flg)
     cur_bit_pos += 3
 
     # get 4-bit RCODE
-    r_code = bin_str[cur_bit_pos:cur_bit_pos+4]
+    r_code = bin_str[cur_bit_pos:cur_bit_pos + 4]
     if r_code != '':
         d_flags['rcode'] = int(bin_str[cur_bit_pos: cur_bit_pos + 4], 2)
     else:
@@ -77,7 +75,7 @@ def parse_string_resource_record(rr: str) -> ResourceRecord:
 def parse_string_msg(msg: str) -> Message:
     """Parse a message string to a Message object."""
     lines = msg.splitlines()
-    
+
     # [header]
     header_id = lines[0]
     header_flags = lines[1]
@@ -90,7 +88,7 @@ def parse_string_msg(msg: str) -> Message:
     flags = parse_string_flag(header_flags)
 
     # create a MessageHeader object
-    header = MessageHeader(id=header_id,
+    header = MessageHeader(id=int(header_id),
                            qr=flags['qr'],
                            opcode=flags['opcode'],
                            aa=flags['aa'],
@@ -115,7 +113,6 @@ def parse_string_msg(msg: str) -> Message:
     # (via the _set_header_flags_automatically() method in Message class)
 
     # answers
-    ans = []
     for _ in range(header_ancount):
         message.add_a_new_record_to_answer_section(parse_string_resource_record(lines[cur_line]))
         cur_line += 1
@@ -126,10 +123,28 @@ def parse_string_msg(msg: str) -> Message:
         cur_line += 1
 
     # additional
-    ads = []
     for _ in range(header_arcount):
         message.add_a_new_record_to_additional_section(parse_string_resource_record(lines[cur_line]))
         cur_line += 1
 
-
     return message
+
+def parse_string_cache(cachestr:str) -> Cache:
+    """Parse a cache string to a Cache object."""
+    fields = cachestr.split('/')
+    rr = parse_string_resource_record(fields[0])
+    ttd = int(fields[1])
+    cache = Cache(rr)
+    cache._ttd = ttd
+    return cache
+
+def parse_string_cachesystem(cachesys:str) -> CacheSystem:
+    """Parse a CacheSystem string to a CacheSystem object."""
+    lines = cachesys.splitlines()
+    Sys = CacheSystem()
+    Sys._refresh_time = int(lines[0])
+    Sys._next_refresh_time = int(lines[1])
+    for i in range (2, len(lines)):
+        cache = parse_string_cache(lines[i])
+        Sys._database.append(cache)
+    return Sys

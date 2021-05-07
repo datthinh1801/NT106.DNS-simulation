@@ -1,136 +1,98 @@
 from ResourceRecord import ResourceRecord
-import time
-import copy
-from ParseString import parse_string_resource_record
-
-class Cache_new:
-    def __init__(self):
-        self._data = None
-        self._ttd = None
-
-    def setter(self, record: ResourceRecord = None):
-        self._data = copy.deepcopy(record)
-        self._ttd = self._data._ttl + int(time.time())
-
-    def getter(self):
-        rr = copy.deepcopy(self._data)
-        return rr
-    def to_string(self):
-        return self._data.to_string() + "+" + str(self._ttd)
+from time import time
+from copy import deepcopy
+from Cache import Cache
 
 class CacheSystem:
     def __init__(self, refresh_time=300):
-        self._data = {}
+        self._database = []
         self._refresh_time = refresh_time
-        self._refresh_time_next = int(time.time()) + self._refresh_time
+        self._next_refresh_time = int(time()) + self._refresh_time
 
     def refresh(self):
-        timestamp = int(time.time())
-        if self._refresh_time_next <= timestamp:
-            """
-            neu set `_refresh_time_next` = 05:00:00 thi thoi gian hien tai phai la 05:00:00 hoac lon hon thi moi duoc phep refresh
-            neu thoi diem hien tai chi la 04:59:59 hoac nho hon thi k duoc refresh
-            """
+        """Refresh cache database."""
+        timestamp = int(time())
+        if timestamp >= self._next_refresh_time:
             black_list = []
-            for (i, cache) in self._data.items():
-                if cache._ttd >= timestamp:
+            for i in range(len(self._database)):
+                if self._database[i].ttd >= timestamp:
                     black_list.append(i)
-            for i in black_list:
-                del self._data[i]
-            timestamp = time.time()
-            self._refresh_time_next = timestamp + self._refresh_time
 
-    def get(self, key):
-        # key:(name: str,rr_type: int, rr_class:int)
+            for i in black_list:
+                del self._database[i]
+
+            # Reset the next time to refresh
+            timestamp = int(time())
+            self._next_refresh_time = timestamp + self._refresh_time
+
+    def get(self, name: str, rr_type: int = 1, rr_class: int = 1) -> ResourceRecord:
+        """
+        Get the ResourceRecord that matches the given attributes.
+        This method return the cache if matches; otherwise None.
+
+        Parameter:
+        key     => A tuple of (name: str, rr_type: int, rr_class: int)
+        """
         self.refresh()
 
-        recordcache = self._data.get(key)
-        if not recordcache is None or recordcache._ttd > time.time():
-            rr = recordcache.getter()
-            return rr
+        queried_record = ResourceRecord(name=name, rr_type=rr_type, rr_class=rr_class, ttl=0, rdata="")
+        for cache in self._database:
+            if queried_record == cache.record and time() <= cache._ttd:
+                return cache.record
+
         return None
 
-    def put(self, key, data: ResourceRecord = None):
-        # key:(name: str,rr_type: int, rr_class:int)
-        # record:ResourceRecord: object
+    def put(self, record: ResourceRecord):
+        """
+        Cache a ResourceRecord in the Cache database.
+        If an existing record is already cached, update its ttl and ttd.
+        """
         self.refresh()
 
-        recordcache = Cache_new()
-        # print(type(recordcache),"put")
-        recordcache.setter(data)
+        cache = Cache(record)
+        # Check if a cache of the given record is already cached in the database
+        for i in range(len(self._database)):
+            # If exists, update ttd
+            if cache == self._database[i]:
+                self._database[i].ttd = cache.ttd
+                return
 
-        self._data[key] = recordcache
+        # If not exists, append it to the database
+        self._database.append(cache)
 
-    def CacheSystem_to_string(self):
-        cachesys = ""
-        cachesys += str(self._refresh_time) + "\r\n"
-        cachesys += str(self._refresh_time_next) + "\r\n"
-        for (i, cache) in self._data.items():
-            cachesys += str(i) + ":"
-            cachesys += cache.to_string() + "\r\n"
-        return cachesys
-
-def Parse_string_key(key:str):
-    key = key.replace('(', '')
-    key = key.replace(')', '')
-    fields = key.split(',')
-    return (fields[0], int(fields[1]), int(fields[2]))
-
-def Parse_string_cache(cache:str) -> Cache_new:
-    fields = cache.split('+')
-    rr = parse_string_resource_record(fields[0])
-    ttd = int(fields[1])
-    cachenew = Cache_new()
-    cachenew._data = rr
-    cachenew._ttd = ttd
-    return cachenew
-
-def Parse_string_cache_system(cachesys:str) -> CacheSystem:
-    lines = cachesys.splitlines()
-    # lines = cachesys.split('\r\n')
-    cachesystem = CacheSystem()
-    cachesystem._refresh_time = int(lines[0])
-    cachesystem._refresh_time_next = int(lines[1])
-    for line in range(2,len(lines)):
-        fields = lines[line].split(':')
-        key = Parse_string_key(fields[0])
-        cache = Parse_string_cache(fields[1])
-        cachesystem._data[key] = cache
-    return cachesystem
-
-
-
-
-# ------testttt-----
-RR1 = ResourceRecord("aaa.com", 1, 1, 1000, "1.2.3.4")
-RR2 = ResourceRecord("bbb.com", 1, 1, 1000, "4.1.3")
-RR3 = ResourceRecord("ccc.com", 1, 1, 1000, "3.1.2")
-RR4 = ResourceRecord("ccc.", 1, 1, 1000, "3.1.2")
-
-a = CacheSystem()
-
-a.put(("bbb.com", 1, 1), RR2)
-a.put(("ccc.com", 1, 1), RR3)
-a.put(("ccc.", 1, 1), RR4)
-
-print("--check in cache a--")
-print(a.get(("bbb.com", 1, 1)).to_string())
-
-string = a.CacheSystem_to_string()
-print(string)
-
-b = Parse_string_cache_system(string)
-
-print("--check in cache b--")
-print(b.get(("bbb.com", 1, 1)).to_string())
+    def to_string(self):
+        """
+        Convert the CacheSystem object to a raw string cachesystem for transmission.
+        The resulting string has multiple lines.
+        #1      Refresh Time
+        #2      Next Refresh Time      
+        #Remaining lines are the numbers of cache
+        """
+        string = ""
+        string += str(self._refresh_time) + "\n"
+        string += str(self._next_refresh_time) + "\n"
+        for i in self._database:
+            string += i.to_string() + "\n"
+        return string
 
 """
-string= a.CacheSystem_to_string()
-print(string)
+def parse_string_cache(cachestr:str) -> Cache:
+    # Parse a cache string to a Cache object.
+    fields = cachestr.split('/')
+    rr = parse_string_resource_record(fields[0])
+    ttd = int(fields[1])
+    cache = Cache(rr)
+    cache._ttd = ttd
+    return cache
 
-print(a.get(("aaja.com", 1, 1)))
-
-print(a.get(("bbb.com", 1, 1)).to_string())
-
-print(a.get(("ccc.", 1, 1)).to_string())
+def parse_string_cachesystem(cachesys:str) -> CacheSystem:
+    # Parse a CacheSystem string to a CacheSystem object.
+    lines = cachesys.splitlines()
+    Sys = CacheSystem()
+    Sys._refresh_time = int(lines[0])
+    Sys._next_refresh_time = int(lines[1])
+    for i in range (2, len(lines)):
+        cache = parse_string_cache(lines[i])
+        Sys._database.append(cache)
+    return Sys
 """
