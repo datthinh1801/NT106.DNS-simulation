@@ -34,6 +34,16 @@ class Cache:
         if self.record == other.record:
             return True
         return False
-
+    
+    def to_string(self):
+        """
+        Convert the Cache object to a raw string cache for transmission.
+        The resulting string has 1 lines.
+        #1 record` + '/' + `ttd`
+        """
+        cache = ""
+        cache += self._record.to_string() + "/" + str(self._ttd)
+        return cache
+        
     ttd = property(get_ttd, set_ttd)
     record = property(get_rr)

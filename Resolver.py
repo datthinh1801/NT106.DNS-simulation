@@ -6,6 +6,7 @@ from ResourceRecord import ResourceRecord
 from ParseString import parse_string_msg
 from CacheSystem import CacheSystem
 from configurator import Configurator
+from ParseString import parse_string_cachesystem
 
 
 class Resolver:
@@ -66,6 +67,18 @@ class Resolver:
         message_query = parse_string_msg(message)
         message_question = message_query.question
 
+        # Update cache from database
+        data = ""
+        try:
+            f = open("CacheSystem.txt", "r")
+            data = f.read()
+        except IOError:
+            f = open("CacheSystem.txt", "x")
+        f.close()
+
+        if data != "":
+            self.cache_system = parse_string_cachesystem(data)
+
         cached_record = self.cache_system.get(name=message_question.qname, rr_type=message_question.qtype,
                                               rr_class=message_question.qclass)
         # If an answer record for the query is already cached,
@@ -90,11 +103,15 @@ class Resolver:
 
         # save to cache
         self.save_to_cache_system(message_answer)
+        self.save_to_database()
 
         first_rr = message_answer.answers[0]
         return first_rr.to_string()
 
     def save_to_cache_system(self, message_response: Message):
+        """
+        Save Resource Record from Messase Response to Cache System in code
+        """
         for answer in message_response.answers:
             self.cache_system.put(answer)
 
@@ -103,3 +120,13 @@ class Resolver:
 
         for add in message_response.additional:
             self.cache_system.put(add)
+
+    def save_to_database(self):
+        """
+        Save Cache System from code to database
+        """
+        f = open("CacheSystem.txt", "w+")
+        data = self.cache_system.to_string()
+        f.write(data)
+        f.close()
+
