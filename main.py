@@ -34,3 +34,4 @@ while True:
         print('-' * 30)
     except KeyboardInterrupt:
         print("Quitting...")
+        break
