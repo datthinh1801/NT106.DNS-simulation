@@ -57,8 +57,17 @@ def parse_string_question(question: str) -> MessageQuestion:
     """Parse a question string to a MessageQuestion object."""
     fields = question.split(';')
     qname = fields[0]
-    qtype = int(fields[1])
-    qclass = int(fields[2])
+
+    try:
+        qtype = int(fields[1])
+    except ValueError:
+        qtype = MessageQuestion.QTYPE[fields[1]]
+
+    try:
+        qclass = int(fields[2])
+    except ValueError:
+        qclass = MessageQuestion.QCLASS[fields[2]]
+
     return MessageQuestion(qname, qtype, qclass)
 
 
