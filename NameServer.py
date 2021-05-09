@@ -133,7 +133,8 @@ class NameServer:
         sock.bind(server_address)
 
         # listen for incoming connections
-        print(f"[SERVER] Listening for TCP connections at port {Configurator.SERVER_TCP_PORT}...")
+        print(f"[SERVER]\t Listening for TCP connections at {Configurator.SERVER_IP}:" +
+              f"{Configurator.SERVER_TCP_PORT}...")
         sock.listen(0)
 
         while True:
@@ -175,7 +176,6 @@ class NameServer:
                 print("Exception occurs while handle a tcp connection. " + str(e))
             finally:
                 connection.close()
-                print("disconnecting a tcp connection")
 
     def start_listening_udp(self):
         # create a UDP socket
@@ -185,7 +185,8 @@ class NameServer:
         # bind the socket to the port
         # sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) -> this is for overlap port
         sock.bind(server_address)
-        print(f"[SERVER] Listening for UDP connections at port {Configurator.SERVER_UDP_PORT}...")
+        print(f"[SERVER]\t Listening for UDP connections at {Configurator.SERVER_IP}:" +
+              f"{Configurator.SERVER_UDP_PORT}...")
 
         while True:
             try:
@@ -222,9 +223,7 @@ class NameServer:
                     # print("-----\n")
                     sock.sendto(response, client_address)
             except Exception as e:
-                print("An exception occurs while handling a udp connection." + str(e))
-            finally:
-                print("disconnect a udp connection")
+                print("An exception occurs while handling a udp connection. " + str(e))
 
 
 """

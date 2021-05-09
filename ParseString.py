@@ -5,6 +5,7 @@ from ResourceRecord import ResourceRecord
 from Cache import Cache
 from CacheSystem import CacheSystem
 
+
 def parse_string_flag(flags: str) -> dict:
     """Parse a hex string of flags to a dictionary of flags with values converted properly."""
     # convert hex string to bin string
@@ -56,8 +57,17 @@ def parse_string_question(question: str) -> MessageQuestion:
     """Parse a question string to a MessageQuestion object."""
     fields = question.split(';')
     qname = fields[0]
-    qtype = int(fields[1])
-    qclass = int(fields[2])
+
+    try:
+        qtype = int(fields[1])
+    except ValueError:
+        qtype = MessageQuestion.QTYPE[fields[1]]
+
+    try:
+        qclass = int(fields[2])
+    except ValueError:
+        qclass = MessageQuestion.QCLASS[fields[2]]
+
     return MessageQuestion(qname, qtype, qclass)
 
 
@@ -129,7 +139,8 @@ def parse_string_msg(msg: str) -> Message:
 
     return message
 
-def parse_string_cache(cachestr:str) -> Cache:
+
+def parse_string_cache(cachestr: str) -> Cache:
     """Parse a cache string to a Cache object."""
     fields = cachestr.split('/')
     rr = parse_string_resource_record(fields[0])
@@ -138,13 +149,14 @@ def parse_string_cache(cachestr:str) -> Cache:
     cache._ttd = ttd
     return cache
 
-def parse_string_cachesystem(cachesys:str) -> CacheSystem:
+
+def parse_string_cachesystem(cachesys: str) -> CacheSystem:
     """Parse a CacheSystem string to a CacheSystem object."""
     lines = cachesys.splitlines()
-    Sys = CacheSystem()
-    Sys._refresh_time = int(lines[0])
-    Sys._next_refresh_time = int(lines[1])
-    for i in range (2, len(lines)):
+    sys = CacheSystem()
+    sys._refresh_time = int(lines[0])
+    sys._next_refresh_time = int(lines[1])
+    for i in range(2, len(lines)):
         cache = parse_string_cache(lines[i])
-        Sys._database.append(cache)
-    return Sys
+        sys._database.append(cache)
+    return sys

@@ -49,6 +49,25 @@ def parse_args():
                         help='the class of the query',
                         metavar='QCLASS',
                         dest='qclass')
+    parser.add_argument('--ip',
+                        nargs='?',
+                        required=True,
+                        help='IP address of the resolver',
+                        metavar='IP',
+                        dest='resolver_ip')
+    parser.add_argument('--port',
+                        nargs='?',
+                        required=True,
+                        help='port number that the resolver is listening',
+                        metavar='PORT',
+                        dest='resolver_port',
+                        type=int)
+    parser.add_argument('--protocol',
+                        nargs='?',
+                        default='udp',
+                        help='tcp/udp',
+                        dest='protocol',
+                        type=str)
     return parser.parse_args()
 
 
@@ -63,9 +82,9 @@ def make_query(args_obj) -> str:
     client_socket.settimeout(1.0)
 
     # Prepare a message for transmission
-    msg = f"{args_obj.qname};{args_obj.qtype};{args_obj.qclass}"
+    msg = f"{args_obj.qname};{args_obj.qtype};{args_obj.qclass};{args_obj.protocol}"
     # Send the message to the resolver
-    resolver_address = (Configurator.RESOLVER_IP, Configurator.RESOLVER_UDP_PORT)
+    resolver_address = (args_obj.resolver_ip, args_obj.resolver_port)
     client_socket.sendto(msg.encode(), resolver_address)
 
     # Extract the response only
@@ -85,7 +104,3 @@ except Exception as e:
     response = "[EXCEPTION] " + str(e)
 finally:
     print(response)
-
-# Write output to 'output.txt' file
-# with open('output.txt', 'w') as f:
-#     f.write(response)
