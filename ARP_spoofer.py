@@ -14,12 +14,12 @@ def parse_arguments():
                         nargs=1,
                         dest="target_ip",
                         required=True,
-                        help="the ip of the target machine")
+                        help="the IP address of the target machine")
     parser.add_argument("-g", "--gateway",
                         nargs=1,
                         dest="gateway_ip",
                         required=True,
-                        help="the ip of the default gateway")
+                        help="the IP address of the default gateway")
     return parser.parse_args()
 
 
