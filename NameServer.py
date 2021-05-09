@@ -176,7 +176,6 @@ class NameServer:
                 print("Exception occurs while handle a tcp connection. " + str(e))
             finally:
                 connection.close()
-                print("Disconnecting a tcp connection...")
 
     def start_listening_udp(self):
         # create a UDP socket
@@ -225,8 +224,6 @@ class NameServer:
                     sock.sendto(response, client_address)
             except Exception as e:
                 print("An exception occurs while handling a udp connection. " + str(e))
-            finally:
-                print("Disconnect a udp connection...")
 
 
 """
