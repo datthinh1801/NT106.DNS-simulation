@@ -138,7 +138,9 @@ class Resolver:
         """
         listener_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         listener_socket.bind((Configurator.RESOLVER_IP, Configurator.RESOLVER_UDP_PORT))
-        print(f"[RESOLVER]\t Listening for clients' requests at {Configurator.RESOLVER_UDP_PORT}...")
+        print(
+            f"[RESOLVER]\t Listening for clients' requests at {Configurator.RESOLVER_IP}:" +
+            f"{Configurator.RESOLVER_UDP_PORT}...")
 
         while True:
             # Receive an incoming request
