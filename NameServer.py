@@ -133,8 +133,7 @@ class NameServer:
         sock.bind(server_address)
 
         # listen for incoming connections
-        print(f"[SERVER]\t Listening for TCP connections at {Configurator.SERVER_IP}:" +
-              f"{Configurator.SERVER_TCP_PORT}...")
+        print(f"[SERVER]\t Listening for TCP connections at {Configurator.SERVER_TCP_PORT}...")
         sock.listen(0)
 
         while True:
@@ -185,8 +184,7 @@ class NameServer:
         # bind the socket to the port
         # sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) -> this is for overlap port
         sock.bind(server_address)
-        print(f"[SERVER]\t Listening for UDP connections at {Configurator.SERVER_IP}:" +
-              f"{Configurator.SERVER_UDP_PORT}...")
+        print(f"[SERVER]\t Listening for UDP connections at {Configurator.SERVER_UDP_PORT}...")
 
         while True:
             try:
