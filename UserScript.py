@@ -60,7 +60,8 @@ def parse_args():
                         required=True,
                         help='port number that the resolver is listening',
                         metavar='PORT',
-                        dest='resolver_port')
+                        dest='resolver_port',
+                        type=int)
     return parser.parse_args()
 
 
