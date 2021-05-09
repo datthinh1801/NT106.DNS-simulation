@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument('-t', '--type',
                         nargs='?',
                         default='A',
-                        help='the type of the query',
+                        help='the type of the query (A by default)',
                         metavar='QTYPE',
                         dest='qtype')
 
@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument('-c', '--class',
                         nargs='?',
                         default='IN',
-                        help='the class of the query',
+                        help='the class of the query (IN by default)',
                         metavar='QCLASS',
                         dest='qclass')
     parser.add_argument('--ip',
@@ -65,7 +65,7 @@ def parse_args():
     parser.add_argument('--protocol',
                         nargs='?',
                         default='udp',
-                        help='tcp/udp',
+                        help='tcp/udp (udp by default)',
                         dest='protocol',
                         type=str)
     return parser.parse_args()
