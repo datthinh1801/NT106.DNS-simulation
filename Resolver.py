@@ -7,6 +7,7 @@ from ParseString import parse_string_msg
 from CacheSystem import CacheSystem
 from configurator import Configurator
 from ParseString import parse_string_cachesystem
+from ParseString import parse_string_question
 
 
 class Resolver:
@@ -15,14 +16,29 @@ class Resolver:
         self.cache_system = CacheSystem()
         Configurator.config_resolver(9393, 9292)
 
+        # Update cache from local file
+        try:
+            # open the local cache file to load past caches
+            with open("CacheSystem.txt", "r") as f:
+                self.cache_system = parse_string_cachesystem(f.read())
+        except:
+            # if a local file does not exist, which means there is no past cache,
+            # do nothing
+            pass
+
+    def __del__(self):
+        """Destructor of Resolver."""
+        self.save_to_database()
+
     @staticmethod
-    def use_tcp(message: str) -> str:
+    def _use_tcp(message: str) -> str:
         """
         Create a TCP connection to server, then send the message.
         If there is an error while sending and receiving the message, an exception will be returned.
         """
         tcp_resolver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = (Configurator.SERVER_IP, Configurator.SERVER_TCP_PORT)
+        tcp_resolver_socket.settimeout(1.0)
         tcp_resolver_socket.connect(server_address)
 
         try:
@@ -39,7 +55,7 @@ class Resolver:
             return response
 
     @staticmethod
-    def use_udp(message: str) -> str:
+    def _use_udp(message: str) -> str:
         """
         Create a UDP connection to server, then send the message.
         If there is an error while sending and receiving the message, an exception will be returned.
@@ -48,7 +64,8 @@ class Resolver:
         server_address = (Configurator.SERVER_IP, Configurator.SERVER_UDP_PORT)
 
         # Create a UDP socket at client side
-        udp_resolver_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        udp_resolver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        udp_resolver_socket.settimeout(value=1.0)
 
         try:
             # Send data
@@ -62,55 +79,41 @@ class Resolver:
             udp_resolver_socket.close()
             return response
 
-    def query(self, message: str, tcp: bool = False) -> str:
-        # Create a Message query from a given string message
-        message_query = parse_string_msg(message)
-        message_question = message_query.question
+    def query(self, request: Message, tcp: bool = False) -> str:
+        """
+        Resolve the request.
+        Before asking the name server, resolver will check its cache system for cached resource records.
+        """
+        # Check the cache database for existing answer record
+        cached_record = self.cache_system.get(name=request.question.qname, rr_type=request.question.qtype,
+                                              rr_class=request.question.qclass)
 
-        # Update cache from database
-        data = ""
-        try:
-            f = open("CacheSystem.txt", "r")
-            data = f.read()
-        except IOError:
-            f = open("CacheSystem.txt", "x")
-        f.close()
-
-        if data != "":
-            self.cache_system = parse_string_cachesystem(data)
-
-        cached_record = self.cache_system.get(name=message_question.qname, rr_type=message_question.qtype,
-                                              rr_class=message_question.qclass)
         # If an answer record for the query is already cached,
         # return the record
         if cached_record is not None:
-            # print("in cache")
             return cached_record.to_string()
 
         # Otherwise, send the query to the NameServer
-        request = message
-        response = None
-        while response is None:
-            if tcp:
-                response = self.use_tcp(request)
-            else:
-                response = self.use_udp(request)
+        if tcp:
+            response = self._use_tcp(request.to_string())
+        else:
+            response = self._use_udp(request.to_string())
 
         if response.split("-")[0] == "Failed":
             return response.split("-")[1]
         else:
             message_answer = parse_string_msg(response)
 
-        # save to cache
+        # save to on-memory cache system
         self.save_to_cache_system(message_answer)
-        self.save_to_database()
 
+        # return the first resource record in the answer section
         first_rr = message_answer.answers[0]
         return first_rr.to_string()
 
     def save_to_cache_system(self, message_response: Message):
         """
-        Save Resource Record from Messase Response to Cache System in code
+        Cache resource record from a Message object.
         """
         for answer in message_response.answers:
             self.cache_system.put(answer)
@@ -123,10 +126,34 @@ class Resolver:
 
     def save_to_database(self):
         """
-        Save Cache System from code to database
+        Save cache to a local file.
         """
-        f = open("CacheSystem.txt", "w+")
-        data = self.cache_system.to_string()
-        f.write(data)
-        f.close()
+        with open("CacheSystem.txt", "w") as f:
+            data = self.cache_system.to_string()
+            f.write(data)
 
+    def start_listening_udp(self):
+        """
+        Listen to incoming connections from clients to resolve requests in-house.
+        """
+        listener_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        listener_socket.bind((Configurator.RESOLVER_IP, Configurator.RESOLVER_UDP_PORT))
+        print(f"[RESOLVER]\t Listening for clients' requests at {Configurator.RESOLVER_IP}:" +
+              f"{Configurator.RESOLVER_UDP_PORT}...")
+
+        while True:
+            # Receive an incoming request
+            byte_data = listener_socket.recvfrom(Configurator.BUFFER_SIZE)
+            request = byte_data[0].decode('utf-8')
+            client_address = byte_data[1]
+
+            # Handle the request and create a Message object for further query
+            question = parse_string_question(request)
+            header = MessageHeader()
+            request_message = Message(header=header, question=question)
+            response = self.query(request=request_message, tcp=False)
+
+            try:
+                listener_socket.sendto(response.encode('utf-8'), client_address)
+            except:
+                continue
