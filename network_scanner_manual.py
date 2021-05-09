@@ -7,7 +7,7 @@ import scapy.all as scapy
 
 def create_a_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--target", dest="target", nargs="?", help="IP address of the target or an IP range",
+    parser.add_argument("-t", "--target", dest="target", nargs="?", help="IP address of a target host or an IP range of a target network",
                         required=True)
     return parser.parse_args()
 
