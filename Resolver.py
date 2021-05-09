@@ -65,7 +65,7 @@ class Resolver:
 
         # Create a UDP socket at client side
         udp_resolver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        udp_resolver_socket.settimeout(value=1.0)
+        udp_resolver_socket.settimeout(1.0)
 
         try:
             # Send data
