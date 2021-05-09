@@ -145,16 +145,21 @@ class Resolver:
         while True:
             # Receive an incoming request
             byte_data = listener_socket.recvfrom(Configurator.BUFFER_SIZE)
-            request = byte_data[0].decode('utf-8')
             client_address = byte_data[1]
+            request = byte_data[0].decode('utf-8').split(';')
+            protocol = request.pop()
+            request = ';'.join(request)
 
-            print(f"[RESOLVER]\t Request for {request} from {client_address}")
+            print(f"[RESOLVER]\t Request for {request} from {client_address} using {protocol.upper()}")
 
             # Handle the request and create a Message object for further query
             question = parse_string_question(request)
             header = MessageHeader()
             request_message = Message(header=header, question=question)
-            response = self.query(request=request_message, tcp=False)
+            if protocol == 'udp':
+                response = self.query(request=request_message, tcp=False)
+            else:
+                response = self.query(request=request_message, tcp=True)
 
             try:
                 listener_socket.sendto(response.encode('utf-8'), client_address)
