@@ -3,6 +3,7 @@ from time import time
 from copy import deepcopy
 from Cache import Cache
 
+
 class CacheSystem:
     def __init__(self, refresh_time=300):
         self._database = []
@@ -62,37 +63,15 @@ class CacheSystem:
 
     def to_string(self):
         """
-        Convert the CacheSystem object to a raw string cachesystem for transmission.
+        Convert the CacheSystem object to a raw string cache system for transmission.
         The resulting string has multiple lines.
         #1      Refresh Time
         #2      Next Refresh Time      
-        #Remaining lines are the numbers of cache
+        # Remaining lines are caches (a cache/line)
         """
         string = ""
         string += str(self._refresh_time) + "\n"
         string += str(self._next_refresh_time) + "\n"
-        for i in self._database:
-            string += i.to_string() + "\n"
+        for cache in self._database:
+            string += cache.to_string() + "\n"
         return string
-
-"""
-def parse_string_cache(cachestr:str) -> Cache:
-    # Parse a cache string to a Cache object.
-    fields = cachestr.split('/')
-    rr = parse_string_resource_record(fields[0])
-    ttd = int(fields[1])
-    cache = Cache(rr)
-    cache._ttd = ttd
-    return cache
-
-def parse_string_cachesystem(cachesys:str) -> CacheSystem:
-    # Parse a CacheSystem string to a CacheSystem object.
-    lines = cachesys.splitlines()
-    Sys = CacheSystem()
-    Sys._refresh_time = int(lines[0])
-    Sys._next_refresh_time = int(lines[1])
-    for i in range (2, len(lines)):
-        cache = parse_string_cache(lines[i])
-        Sys._database.append(cache)
-    return Sys
-"""
