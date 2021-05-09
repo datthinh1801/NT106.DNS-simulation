@@ -147,6 +147,8 @@ class Resolver:
             request = byte_data[0].decode('utf-8')
             client_address = byte_data[1]
 
+            print(f"[RESOLVER]\t Request for {request} from {client_address}")
+
             # Handle the request and create a Message object for further query
             question = parse_string_question(request)
             header = MessageHeader()
