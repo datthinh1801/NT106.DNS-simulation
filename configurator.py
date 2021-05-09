@@ -17,9 +17,6 @@ class Configurator:
 
     BUFFER_SIZE = 4096
 
-    def __init__(self):
-        pass
-
     @staticmethod
     def config_server(tcp_port: int, udp_port: int):
         """Config server's constants."""
