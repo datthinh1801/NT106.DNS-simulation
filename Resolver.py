@@ -26,10 +26,6 @@ class Resolver:
             # do nothing
             pass
 
-    def __del__(self):
-        """Destructor of Resolver."""
-        self.save_to_database()
-
     @staticmethod
     def _use_tcp(message: str) -> str:
         """
@@ -106,6 +102,8 @@ class Resolver:
 
         # save to on-memory cache system
         self.save_to_cache_system(message_answer)
+        # write new database to file
+        self.save_to_database()
 
         # return the first resource record in the answer section
         first_rr = message_answer.answers[0]
