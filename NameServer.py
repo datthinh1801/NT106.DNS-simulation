@@ -102,11 +102,6 @@ class NameServer:
             response_message = "Failed-" + str(e)
             return response_message
 
-        # print("\n-----")
-        # print("request: ", message_query.question.to_string())
-        # print("response: ", resolve_query.response)
-        # print("-----\n")
-
         # handle error query here
         response_message = self.convert_response_answer_to_response_message(resolve_query.response, message_query)
 
@@ -145,7 +140,7 @@ class NameServer:
                 data_receive = byte_data.decode('utf-8')
                 if data_receive:
                     message_query = parse_string_msg(data_receive)
-                    print(f"[SERVER] Receive request for {message_query.question.qname} via TCP")
+                    print(f"[SERVER]\t Receive request for {message_query.question.qname} via TCP")
 
                     # message question
                     msg_question = message_query.question
@@ -153,7 +148,6 @@ class NameServer:
                     # find in cache first
                     cached_record = self.CACHE.get(msg_question.qname, msg_question.qtype, msg_question.qclass)
                     if cached_record is not None:
-                        # print("in cache")
                         message_result = Message(request=message_query)
                         message_result.add_a_new_record_to_answer_section(cached_record)
                     else:
@@ -162,9 +156,6 @@ class NameServer:
 
                     if not isinstance(message_result, str):
                         message_result = message_result.to_string()
-
-                    # print("response: ", message_result)
-                    # print("-----\n")
 
                     response = message_result.encode('utf-8')
                     connection.sendall(response)
@@ -195,7 +186,7 @@ class NameServer:
                 if data_receive:
                     message_query = parse_string_msg(data_receive)
 
-                    print(f"[SERVER] Receive request for {message_query.header.qname} via UDP")
+                    print(f"[SERVER]\t Receive request for {message_query.question.qname} via UDP")
 
                     # message question
                     msg_question = message_query.question
