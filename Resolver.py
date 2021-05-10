@@ -49,7 +49,7 @@ class Resolver:
             # receiving data
             response = tcp_resolver_socket.recv(Configurator.BUFFER_SIZE).decode('utf-8')
         except Exception as e:
-            response = str(e)
+            response = "Failed-" + str(e)
         finally:
             tcp_resolver_socket.close()
             return response
@@ -74,7 +74,7 @@ class Resolver:
             # Receiving data & convert bytes of data to a string
             response = udp_resolver_socket.recvfrom(Configurator.BUFFER_SIZE)[0].decode('utf-8')
         except Exception as e:
-            response = str(e)
+            response = "Failed-" + str(e)
         finally:
             udp_resolver_socket.close()
             return response
