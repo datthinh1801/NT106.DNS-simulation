@@ -145,9 +145,7 @@ class NameServer:
                 data_receive = byte_data.decode('utf-8')
                 if data_receive:
                     message_query = parse_string_msg(data_receive)
-
-                    # print("\n-----")
-                    # print("request: ", data_receive)
+                    print(f"[SERVER] Receive request for {message_query.question.qname} via TCP")
 
                     # message question
                     msg_question = message_query.question
@@ -197,8 +195,7 @@ class NameServer:
                 if data_receive:
                     message_query = parse_string_msg(data_receive)
 
-                    # print("\n-----")
-                    # print("request: ", data_receive)
+                    print(f"[SERVER] Receive request for {message_query.header.qname} via UDP")
 
                     # message question
                     msg_question = message_query.question
