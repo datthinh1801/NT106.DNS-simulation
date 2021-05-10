@@ -81,7 +81,7 @@ class Resolver:
         Before asking the name server, resolver will check its cache system for cached resource records.
         """
         # Check the cache database for existing answer record
-        cached_record = self.cache_system.get(name=request.question.qname, rr_type=request.question.qtype,
+        cached_record = self.cache_system.get(name=request.question.qname + ".", rr_type=request.question.qtype,
                                               rr_class=request.question.qclass)
 
         # If an answer record for the query is already cached,
