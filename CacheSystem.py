@@ -38,7 +38,7 @@ class CacheSystem:
 
         queried_record = ResourceRecord(name=name, rr_type=rr_type, rr_class=rr_class, ttl=0, rdata="")
         for cache in self._database:
-            if queried_record == cache.record and time() <= cache._ttd:
+            if queried_record == cache.record:
                 return cache.record
 
         return None
