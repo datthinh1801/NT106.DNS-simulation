@@ -96,10 +96,10 @@ We run the `UserScript.py` to make a query for `facebook.com`. Here, we run this
 ```
 python3 UserScript.py -d facebook.com --ip 10.0.0.5 --port 9292
 ```
-The result in return is `facebook.com;1;1;205;69.171.250.35`. The last part of the reponse (`69.171.250.35`) is the IP address of `facebook.com`.  
+The result in return is `facebook.com.;1;1;205;69.171.250.35`. The last part of the reponse (`69.171.250.35`) is the IP address of `facebook.com`.  
 In addition, if we examine the resolver's log, we can see a message specifying that the resolver has received a request from a user. 
 ```
-[RESOLVER]       Request for facebook.com;A;IN from ('10.0.0.7', 49775) using UDP
+[RESOLVER]       Receive a request for facebook.com;A;IN from ('10.0.0.7', 49775) using UDP
 ```
 > If we want to specify the Resolver to make a query to the Nameserver via TCP, we need to execute the script with the `--protocol tcp` option.
 ### Now, let's do some hacking.  
@@ -128,5 +128,5 @@ Now let's come back to the machine that runs `UserScript.py` and make a query fo
 python3 UserScript.py -d facebook.com --ip 10.0.0.5 --port 9292
 ```
 
-This time, the response is `facebook.com;1;1;205;10.0.0.10` which carries the spoofed IP address specified by our `DNS_spoofer`.  
+This time, the response is `facebook.com.;1;1;205;10.0.0.10` which carries the spoofed IP address specified by our `DNS_spoofer`.  
 But if we make a query for `youtube.com`, the response is not spoofed (`youtube.com.;1;1;43;172.217.31.238`).
