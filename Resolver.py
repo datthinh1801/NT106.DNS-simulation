@@ -148,7 +148,7 @@ class Resolver:
             protocol = request.pop()
             request = ';'.join(request)
 
-            print(f"[RESOLVER]\t Request for {request} from {client_address} using {protocol.upper()}")
+            print(f"[RESOLVER]\t Receive a request for {request} from {client_address} using {protocol.upper()}")
 
             # Handle the request and create a Message object for further query
             question = parse_string_question(request)
