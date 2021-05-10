@@ -26,10 +26,6 @@ class Resolver:
             # do nothing
             pass
 
-    def __del__(self):
-        """Destructor of Resolver."""
-        self.save_to_database()
-
     @staticmethod
     def _use_tcp(message: str) -> str:
         """
@@ -49,7 +45,7 @@ class Resolver:
             # receiving data
             response = tcp_resolver_socket.recv(Configurator.BUFFER_SIZE).decode('utf-8')
         except Exception as e:
-            response = str(e)
+            response = "Failed-" + str(e)
         finally:
             tcp_resolver_socket.close()
             return response
@@ -74,7 +70,7 @@ class Resolver:
             # Receiving data & convert bytes of data to a string
             response = udp_resolver_socket.recvfrom(Configurator.BUFFER_SIZE)[0].decode('utf-8')
         except Exception as e:
-            response = str(e)
+            response = "Failed-" + str(e)
         finally:
             udp_resolver_socket.close()
             return response
@@ -85,7 +81,7 @@ class Resolver:
         Before asking the name server, resolver will check its cache system for cached resource records.
         """
         # Check the cache database for existing answer record
-        cached_record = self.cache_system.get(name=request.question.qname, rr_type=request.question.qtype,
+        cached_record = self.cache_system.get(name=request.question.qname + ".", rr_type=request.question.qtype,
                                               rr_class=request.question.qclass)
 
         # If an answer record for the query is already cached,
@@ -106,6 +102,8 @@ class Resolver:
 
         # save to on-memory cache system
         self.save_to_cache_system(message_answer)
+        # write new database to file
+        self.save_to_database()
 
         # return the first resource record in the answer section
         first_rr = message_answer.answers[0]
