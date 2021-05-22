@@ -6,6 +6,7 @@ domain name will be written to an output file; otherwise, write out a "Timeout".
 import argparse
 from socket import *
 from configurator import Configurator
+from MessageQuestion import MessageQuestion
 
 
 def parse_args():
@@ -82,7 +83,10 @@ def make_query(args_obj) -> str:
     client_socket.settimeout(1.0)
 
     # Prepare a message for transmission
-    msg = f"{args_obj.qname};{args_obj.qtype};{args_obj.qclass};{args_obj.protocol}"
+    # msg = f"{args_obj.qname};{args_obj.qtype};{args_obj.qclass};{args_obj.protocol}"
+    # --------------------------
+    qst = MessageQuestion(args_obj.qname, args_obj.qtype, args_obj.qclass)
+    msg = qst.to_string()+";"+args_obj.protocol
     # Send the message to the resolver
     resolver_address = (args_obj.resolver_ip, args_obj.resolver_port)
     client_socket.sendto(msg.encode(), resolver_address)
