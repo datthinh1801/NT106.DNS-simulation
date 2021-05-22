@@ -4,7 +4,7 @@ import scapy.all as scapy
 from argparse import ArgumentParser
 
 
-def parse_args():
+def parse_cli_args():
     """
     Parse arguments from CLI.
     """
@@ -53,3 +53,7 @@ def process_packet(packet):
     """
     if packet.haslayer(scapy.ARP) and packet[scapy.ARP].op == 2:
         packet.show()
+
+
+args = parse_cli_args()
+sniff(args.interface)
