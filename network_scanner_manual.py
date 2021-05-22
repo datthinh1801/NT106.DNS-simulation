@@ -7,7 +7,8 @@ import scapy.all as scapy
 
 def create_a_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--target", dest="target", nargs="?", help="IP address of a target host or an IP range of a target network",
+    parser.add_argument("-t", "--target", dest="target", nargs="?",
+                        help="IP address of a target host or an IP range of a target network",
                         required=True)
     return parser.parse_args()
 
@@ -15,7 +16,6 @@ def create_a_parser():
 def scan(ip):
     # Create an ARP request
     arp_request = scapy.ARP(pdst=ip)
-
 
     # Create an Ethernet frame
     # Default value of dst is already 'ff:ff:ff:ff:ff:ff'
