@@ -52,7 +52,12 @@ def process_packet(packet):
     Callback function to process sniffed packet.
     """
     if packet.haslayer(scapy.ARP) and packet[scapy.ARP].op == 2:
-        packet.show()
+        supposed_ip = packet[scapy.ARP].psrc
+        supposed_mac = packet[scapy.ARP].hwsrc
+        real_mac = get_mac(supposed_ip)
+
+        if supposed_mac != real_mac:
+            print(f"You are under attacks! The attacker might be at {supposed_mac} or {real_mac}")
 
 
 args = parse_cli_args()
