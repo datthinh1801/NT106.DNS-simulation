@@ -1,9 +1,5 @@
 # DNS simulation
 This project is part of a university curriculum which is *Basic Networking Programming*.  
-> Author:  
-> [*Dat Thinh*](https://github.com/datthinh1801)  
-> [*Xuan Ninh*](https://github.com/xuanninh1412)  
-> [*Minh Tien*](https://github.com/mt2651)
 
 # Introduction
 This project has 2 main features.  
@@ -129,4 +125,9 @@ python3 UserScript.py -d facebook.com --ip 10.0.0.5 --port 9292
 ```
 
 This time, the response is `facebook.com.;1;1;205;10.0.0.10` which carries the spoofed IP address specified by our `DNS_spoofer`.  
-But if we make a query for `youtube.com`, the response is not spoofed (`youtube.com.;1;1;43;172.217.31.238`).
+But if we make a query for `youtube.com`, the response is not spoofed (`youtube.com.;1;1;43;172.217.31.238`).  
+
+# Contributors
+- [*Dat Thinh*](https://github.com/datthinh1801)  
+- [*Xuan Ninh*](https://github.com/xuanninh1412)  
+- [*Minh Tien*](https://github.com/mt2651)
