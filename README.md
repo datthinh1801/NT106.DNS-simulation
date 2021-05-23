@@ -80,7 +80,7 @@ optional arguments:
   -l [TRUE], --local [TRUE]
                         Use this option if this script is run locally
 ```  
-# An example demonstration
+## Demonstration
 We run the `main.py` on a machine whose IP address is `10.0.0.5`.  
 Then, we'll receive logs as followed:
 ```bash
