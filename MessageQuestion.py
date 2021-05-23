@@ -18,7 +18,7 @@ class MessageQuestion:
     INV_QCLASS = dict(ResourceRecord.INV_RRCLASS)
     INV_QCLASS.update({255: "*"})
 
-    def __init__(self, qname: str, qtype: int, qclass: int):
+    def __init__(self, qname: str, qtype, qclass):
         """
         Initialize a question.
 
@@ -75,31 +75,38 @@ class MessageQuestion:
                 return False
         return True
 
-    def _validate_(self, qname: str, qtype: int, qclass: int) -> bool:
+    def _validate_(self, qname: str, qtype, qclass) -> bool:
         """Validate the QNAME, QTYPE, QCLASS before setting values."""
         # check data types
         if not self._check_data_type_(qname, dtype='str'):
-            return False
+            raise Exception("Domain is not str.")
+            # return False
+        """
         elif not self._check_data_type_(qtype, qclass, dtype='int'):
             return False
-
+        """
         # check if hostname is empty or exceeds the size limit of 255 bytes
         if qname == "" or len(qname) > 255:
-            return False
+            raise Exception("The size limit of domain is 255 bytes.")
+            # return False
         # check if hostname is not of the format label.label[.label[.label...]]
         elif len(qname.split(".")) <= 1:
-            return False
+            raise Exception("Not exist '.' in domain.")
+            # return False
         # if hostname is of valid format, check if any label of the hostname exceeds the size limit of 63 bytes
         elif len(qname.split(".")) > 1:
             for label in qname.split("."):
                 if len(label) > 63:
-                    return False
+                    raise Exception("The size limit of label is 63 bytes.")
+                    # return False
         # check if qtype is of invalid code
-        elif qtype not in MessageQuestion.QTYPE.values():
-            return False
+        elif qtype not in MessageQuestion.QTYPE.values() & qtype not in MessageQuestion.INV_QTYPE.values() :
+            raise Exception("QTYPE does not exist.")
+            # return False
         # check if qclass is of invalid code
-        elif qclass not in MessageQuestion.QCLASS.values():
-            return False
+        elif qclass not in MessageQuestion.QCLASS.values() & qclass not in MessageQuestion.INV_QCLASS.values() :
+            raise Exception("QCLASS does not exist.")
+            # return False
 
         # overall true
         return True
