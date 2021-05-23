@@ -43,10 +43,10 @@ optional arguments:
 
 ## DNS Spoofing
 ### Network Scanner
-To be the man in the middle, we need to know the IP addresses of our 2 targets. For this reason, run the `network_scanner_manual.py` script with the `-t` option to specify the IP range of the network that we want to scan. The outcome of this script will be the ***IP addresses*** as well as ***MAC addresses*** of **all hosts** in the targeted network.  
+To be the man in the middle, we need to know the IP addresses of our 2 targets. For this reason, run the `Network_Scanner.py` script with the `-t` option to specify the IP range of the network that we want to scan. The outcome of this script will be the ***IP addresses*** as well as ***MAC addresses*** of **all hosts** in the targeted network.  
 Use the `-h` option to see the help message.
 ```python
-usage: network_scanner_manual.py [-h] -t [TARGET]
+usage: Network_Scanner.py [-h] -t [TARGET]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -103,7 +103,7 @@ In addition, if we examine the resolver's log, we can see a message specifying t
 ```
 > If we want to specify the Resolver to make a query to the Nameserver via TCP, we need to execute the script with the `--protocol tcp` option.
 ### Now, let's do some hacking.  
-First and foremost, as we already know the IP addresses of the machines that run the `main.py` and `UserScript.py`, it is unnecessary to run the `network_scanner_manual.py`.  
+First and foremost, as we already know the IP addresses of the machines that run the `main.py` and `UserScript.py`, it is unnecessary to run the `Network_Scanner.py`.  
 Next, we need to run the `ARP_spoofer.py` to make us become the man in the middle between the Resolver and User.
 ```bash
 sudo python3 ARP_spoofer.py -t 10.0.0.7 -g 10.0.0.5
