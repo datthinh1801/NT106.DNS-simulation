@@ -151,13 +151,19 @@ class Resolver:
             print(f"[RESOLVER]\t Receive a request for {request} from {client_address} using {protocol.upper()}")
 
             # Handle the request and create a Message object for further query
-            question = parse_string_question(request)
-            header = MessageHeader()
-            request_message = Message(header=header, question=question)
-            if protocol == 'udp':
-                response = self.query(request=request_message, tcp=False)
-            else:
-                response = self.query(request=request_message, tcp=True)
+            response = ""
+            try:
+                question = parse_string_question(request)
+            except Exception as e:
+                response = "[EXCEPTION] " + str(e)
+
+            if response == "" :
+                header = MessageHeader()
+                request_message = Message(header=header, question=question)
+                if protocol == 'udp':
+                    response = self.query(request=request_message, tcp=False)
+                else:
+                    response = self.query(request=request_message, tcp=True)
 
             try:
                 listener_socket.sendto(response.encode('utf-8'), client_address)

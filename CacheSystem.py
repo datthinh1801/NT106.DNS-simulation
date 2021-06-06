@@ -16,10 +16,10 @@ class CacheSystem:
         if timestamp >= self._next_refresh_time:
             black_list = []
             for i in range(len(self._database)):
-                if self._database[i].ttd >= timestamp:
+                if self._database[i].ttd < timestamp:
                     black_list.append(i)
 
-            for i in black_list:
+            for i in reversed(black_list):
                 del self._database[i]
 
             # Reset the next time to refresh

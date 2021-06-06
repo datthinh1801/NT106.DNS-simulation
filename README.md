@@ -1,9 +1,5 @@
 # DNS simulation
 This project is part of a university curriculum which is *Basic Networking Programming*.  
-> Author:  
-> [*Dat Thinh*](https://github.com/datthinh1801)  
-> [*Xuan Ninh*](https://github.com/xuanninh1412)  
-> [*Minh Tien*](https://github.com/mt2651)
 
 # Introduction
 This project has 2 main features.  
@@ -43,10 +39,10 @@ optional arguments:
 
 ## DNS Spoofing
 ### Network Scanner
-To be the man in the middle, we need to know the IP addresses of our 2 targets. For this reason, run the `network_scanner_manual.py` script with the `-t` option to specify the IP range of the network that we want to scan. The outcome of this script will be the ***IP addresses*** as well as ***MAC addresses*** of **all hosts** in the targeted network.  
+To be the man in the middle, we need to know the IP addresses of our 2 targets. For this reason, run the `Network_Scanner.py` script with the `-t` option to specify the IP range of the network that we want to scan. The outcome of this script will be the ***IP addresses*** as well as ***MAC addresses*** of **all hosts** in the targeted network.  
 Use the `-h` option to see the help message.
 ```python
-usage: network_scanner_manual.py [-h] -t [TARGET]
+usage: Network_Scanner.py [-h] -t [TARGET]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -84,7 +80,7 @@ optional arguments:
   -l [TRUE], --local [TRUE]
                         Use this option if this script is run locally
 ```  
-# An example demonstration
+## Demonstration
 We run the `main.py` on a machine whose IP address is `10.0.0.5`.  
 Then, we'll receive logs as followed:
 ```bash
@@ -103,7 +99,7 @@ In addition, if we examine the resolver's log, we can see a message specifying t
 ```
 > If we want to specify the Resolver to make a query to the Nameserver via TCP, we need to execute the script with the `--protocol tcp` option.
 ### Now, let's do some hacking.  
-First and foremost, as we already know the IP addresses of the machines that run the `main.py` and `UserScript.py`, it is unnecessary to run the `network_scanner_manual.py`.  
+First and foremost, as we already know the IP addresses of the machines that run the `main.py` and `UserScript.py`, it is unnecessary to run the `Network_Scanner.py`.  
 Next, we need to run the `ARP_spoofer.py` to make us become the man in the middle between the Resolver and User.
 ```bash
 sudo python3 ARP_spoofer.py -t 10.0.0.7 -g 10.0.0.5
@@ -129,4 +125,9 @@ python3 UserScript.py -d facebook.com --ip 10.0.0.5 --port 9292
 ```
 
 This time, the response is `facebook.com.;1;1;205;10.0.0.10` which carries the spoofed IP address specified by our `DNS_spoofer`.  
-But if we make a query for `youtube.com`, the response is not spoofed (`youtube.com.;1;1;43;172.217.31.238`).
+But if we make a query for `youtube.com`, the response is not spoofed (`youtube.com.;1;1;43;172.217.31.238`).  
+
+# Contributors
+- [*Dat Thinh*](https://github.com/datthinh1801)  
+- [*Xuan Ninh*](https://github.com/xuanninh1412)  
+- [*Minh Tien*](https://github.com/mt2651)
