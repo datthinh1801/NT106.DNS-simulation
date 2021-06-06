@@ -9,7 +9,7 @@ This project has 2 main features.
 ## Dependencies
 - `scapy` (for python 3.9)
 - `dnspython` (for python 3.9)
-- `netfilterqeuue` (for python 2.7)
+- `netfilterqueue` (for python 2.7)
 
 # Instruction
 ## DNS protocol simulation
