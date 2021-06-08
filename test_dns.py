@@ -1,7 +1,7 @@
 import dns.resolver
 import dns.zone
 #test enter wrong domain name with false rasie exception
-domain = "facebook.com"
+domain = "sontruong.asia"
 #domain = "a.ns.facebook.com"
 print("--- Viet nam server ---")
 my_resolver = dns.resolver.Resolver()

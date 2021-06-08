@@ -18,6 +18,10 @@ class Configurator:
     SERVER_TCP_PORT = None
     SERVER_UDP_PORT = None
 
+    BACKUP_SERVER_IP = ""
+    BACKUP_SERVER_TCP_PORT = None
+    BACKUP_SERVER_UDP_PORT = None
+
     BUFFER_SIZE = 4096
 
     @staticmethod
@@ -43,6 +47,15 @@ class Configurator:
         Configurator.SERVER_IP = Configurator.get_ip()
         Configurator.SERVER_TCP_PORT = tcp_port
         Configurator.SERVER_UDP_PORT = udp_port
+        os.system("clear")
+
+    @staticmethod
+    def config_backup_server(tcp_port: int, udp_port: int):
+        """Config server's constants."""
+        print("##### BACKUP SERVER CONFIG #####")
+        Configurator.BACKUP_SERVER_IP = Configurator.get_ip()
+        Configurator.BACKUP_SERVER_TCP_PORT = tcp_port
+        Configurator.BACKUP_SERVER_UDP_PORT = udp_port
         os.system("clear")
 
     @staticmethod
