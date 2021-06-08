@@ -15,8 +15,14 @@ class Resolver:
         """Initialize a Resolver."""
         self.cache_system = CacheSystem()
         Configurator.config_resolver(9393, 9292)
+
         Configurator.SERVER_IP = input('Enter IP of NameServer: ')
+        Configurator.SERVER_TCP_PORT = 5353
+        Configurator.SERVER_UDP_PORT = 5252
+
         Configurator.BACKUP_SERVER_IP = input('Enter IP of BackUp NameServer: ')
+        Configurator.BACKUP_SERVER_TCP_PORT = 6363
+        Configurator.BACKUP_SERVER_UDP_PORT = 6262
 
         # Update cache from local file
         try:
