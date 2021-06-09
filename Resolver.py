@@ -1,4 +1,5 @@
 import socket
+import threading
 from Message import Message
 from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
@@ -14,15 +15,9 @@ class Resolver:
     def __init__(self):
         """Initialize a Resolver."""
         self.cache_system = CacheSystem()
-        Configurator.config_resolver(9393, 9292)
-
-        Configurator.SERVER_IP = input('Enter IP of NameServer: ')
-        Configurator.SERVER_TCP_PORT = 5353
-        Configurator.SERVER_UDP_PORT = 5252
-
-        Configurator.BACKUP_SERVER_IP = input('Enter IP of BackUp NameServer: ')
-        Configurator.BACKUP_SERVER_TCP_PORT = 6363
-        Configurator.BACKUP_SERVER_UDP_PORT = 6262
+        Configurator.config_me(9292, 9393)
+        Configurator.config_others(int(input("Number of name servers: ")))
+        self.this_ns_idx = 0
 
         # Update cache from local file
         try:
@@ -34,14 +29,16 @@ class Resolver:
             # do nothing
             pass
 
-    @staticmethod
-    def _use_tcp(message: str) -> str:
+    def _use_tcp(self, message: str) -> str:
         """
         Create a TCP connection to server, then send the message.
         If there is an error while sending and receiving the message, an exception will be returned.
         """
         tcp_resolver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = (Configurator.SERVER_IP, Configurator.SERVER_TCP_PORT)
+        server_address = (
+            Configurator.OTHERS[self.this_ns_idx]['ip'], Configurator.OTHERS[self.this_ns_idx]['tcp'])
+        self.this_ns_idx = (self.this_ns_idx + 1) % len(Configurator.OTHERS)
+
         tcp_resolver_socket.settimeout(1.0)
         tcp_resolver_socket.connect(server_address)
 
@@ -51,21 +48,23 @@ class Resolver:
             tcp_resolver_socket.sendall(bytes_to_send)
 
             # receiving data
-            response = tcp_resolver_socket.recv(Configurator.BUFFER_SIZE).decode('utf-8')
+            response = tcp_resolver_socket.recv(
+                Configurator.BUFFER_SIZE).decode('utf-8')
         except Exception as e:
             response = "Failed-" + str(e)
         finally:
             tcp_resolver_socket.close()
             return response
 
-    @staticmethod
-    def _use_udp(message: str) -> str:
+    def _use_udp(self, message: str) -> str:
         """
         Create a UDP connection to server, then send the message.
         If there is an error while sending and receiving the message, an exception will be returned.
         """
         bytes_to_send = message.encode('utf-8')
-        server_address = (Configurator.SERVER_IP, Configurator.SERVER_UDP_PORT)
+        server_address = (
+            Configurator.OTHERS[self.this_ns_idx]['ip'], Configurator.OTHERS[self.this_ns_idx]['udp'])
+        self.this_ns_idx = (self.this_ns_idx + 1) % len(Configurator.OTHERS)
 
         # Create a UDP socket at client side
         udp_resolver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -76,7 +75,8 @@ class Resolver:
             udp_resolver_socket.sendto(bytes_to_send, server_address)
 
             # Receiving data & convert bytes of data to a string
-            response = udp_resolver_socket.recvfrom(Configurator.BUFFER_SIZE)[0].decode('utf-8')
+            response = udp_resolver_socket.recvfrom(
+                Configurator.BUFFER_SIZE)[0].decode('utf-8')
         except Exception as e:
             response = "Failed-" + str(e)
         finally:
@@ -143,10 +143,11 @@ class Resolver:
         Listen to incoming connections from clients to resolve requests in-house.
         """
         listener_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        listener_socket.bind((Configurator.RESOLVER_IP, Configurator.RESOLVER_UDP_PORT))
+        listener_socket.bind(
+            (Configurator.IP, Configurator.UDP_PORT))
         print(
-            f"[RESOLVER]\t Listening for clients' requests at {Configurator.RESOLVER_IP}:" +
-            f"{Configurator.RESOLVER_UDP_PORT}...")
+            f"[RESOLVER]\t Listening for clients' requests at {Configurator.IP}:" +
+            f"{Configurator.UDP_PORT}...")
 
         while True:
             # Receive an incoming request
@@ -156,7 +157,8 @@ class Resolver:
             protocol = request.pop()
             request = ';'.join(request)
 
-            print(f"[RESOLVER]\t Receive a request for {request} from {client_address} using {protocol.upper()}")
+            print(
+                f"[RESOLVER]\t Receive a request for {request} from {client_address} using {protocol.upper()}")
 
             # Handle the request and create a Message object for further query
             response = ""
@@ -165,15 +167,26 @@ class Resolver:
             except Exception as e:
                 response = "[EXCEPTION] " + str(e)
 
-            if response == "" :
+            if response == "":
                 header = MessageHeader()
                 request_message = Message(header=header, question=question)
-                if protocol == 'udp':
+                if protocol.lower() == 'udp':
                     response = self.query(request=request_message, tcp=False)
                 else:
                     response = self.query(request=request_message, tcp=True)
 
             try:
-                listener_socket.sendto(response.encode('utf-8'), client_address)
+                listener_socket.sendto(
+                    response.encode('utf-8'), client_address)
             except:
                 continue
+
+
+if __name__ == '__main__':
+    try:
+        resolver = Resolver()
+
+        udp_thread = threading.Thread(target=resolver.start_listening_udp)
+        udp_thread.start()
+    except KeyboardInterrupt:
+        pass
