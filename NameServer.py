@@ -23,7 +23,7 @@ class NameServer:
         """
         self.ZONE = None
         self.CACHE = CacheSystem()
-        Configurator.config_server(5353, 5252)
+        Configurator.config_me(5252, 5353)
 
     def handle_query(self, query_message: Message) -> Message:
         # query qr == 0 (a query) ? qr == 1 (a response)
@@ -58,7 +58,8 @@ class NameServer:
                 resource_records = ResourceRecord(str(name), int(
                     rr_type), int(rr_class), int(ttl), str(rdata))
                 if i == 1:
-                    message_response.add_a_new_record_to_answer_section(resource_records)
+                    message_response.add_a_new_record_to_answer_section(
+                        resource_records)
                 if i == 2:
                     for j in range(len(RRs)):
                         rdata = RRs[j]
@@ -75,7 +76,8 @@ class NameServer:
         result = self.search_record_in_cache(message_query.question.qname, message_query.question.qtype,
                                              message_query.question.qclass)
         if result is None:
-            result = self.search_record_in_zonefile(message_query.question.qname, message_query.question.qtype)
+            result = self.search_record_in_zonefile(
+                message_query.question.qname, message_query.question.qtype)
 
         if result is None:
             result = self.query_out(message_query)
@@ -97,13 +99,15 @@ class NameServer:
         resolver = dns.resolver.Resolver()
         resolver.nameservers = ['8.8.8.8']
         try:
-            resolve_query = resolver.resolve(qname, message_query.question.INV_QTYPE[qtype], raise_on_no_answer=False)
+            resolve_query = resolver.resolve(
+                qname, message_query.question.INV_QTYPE[qtype], raise_on_no_answer=False)
         except dns.exception.DNSException as e:
             response_message = "Failed-" + str(e)
             return response_message
 
         # handle error query here
-        response_message = self.convert_response_answer_to_response_message(resolve_query.response, message_query)
+        response_message = self.convert_response_answer_to_response_message(
+            resolve_query.response, message_query)
 
         self.save_to_cache_system(response_message)
         return response_message
@@ -122,14 +126,14 @@ class NameServer:
     def start_listening_tcp(self):
         # Create a TCP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = (Configurator.SERVER_IP, Configurator.SERVER_TCP_PORT)
+        server_address = (Configurator.IP, Configurator.TCP_PORT)
 
         # Bind the socket to the port
         sock.bind(server_address)
 
         # listen for incoming connections
-        print(f"[SERVER]\t Listening for TCP connections at {Configurator.SERVER_IP}:" +
-              f"{Configurator.SERVER_TCP_PORT}...")
+        print(f"[SERVER]\t Listening for TCP connections at {Configurator.IP}:" +
+              f"{Configurator.TCP_PORT}...")
         sock.listen(0)
 
         while True:
@@ -140,16 +144,19 @@ class NameServer:
                 data_receive = byte_data.decode('utf-8')
                 if data_receive:
                     message_query = parse_string_msg(data_receive)
-                    print(f"[SERVER]\t Receive request for {message_query.question.qname} via TCP")
+                    print(
+                        f"[SERVER]\t Receive request for {message_query.question.qname} via TCP")
 
                     # message question
                     msg_question = message_query.question
 
                     # find in cache first
-                    cached_record = self.CACHE.get(msg_question.qname, msg_question.qtype, msg_question.qclass)
+                    cached_record = self.CACHE.get(
+                        msg_question.qname, msg_question.qtype, msg_question.qclass)
                     if cached_record is not None:
                         message_result = Message(request=message_query)
-                        message_result.add_a_new_record_to_answer_section(cached_record)
+                        message_result.add_a_new_record_to_answer_section(
+                            cached_record)
                     else:
                         message_result = self.handle_query(message_query)
                     # send the result back to resolver here
@@ -169,13 +176,13 @@ class NameServer:
     def start_listening_udp(self):
         # create a UDP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = (Configurator.SERVER_IP, Configurator.SERVER_UDP_PORT)
+        server_address = (Configurator.IP, Configurator.UDP_PORT)
 
         # bind the socket to the port
         # sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) -> this is for overlap port
         sock.bind(server_address)
-        print(f"[SERVER]\t Listening for UDP connections at {Configurator.SERVER_IP}:" +
-              f"{Configurator.SERVER_UDP_PORT}...")
+        print(f"[SERVER]\t Listening for UDP connections at {Configurator.IP}:" +
+              f"{Configurator.UDP_PORT}...")
 
         while True:
             try:
@@ -186,18 +193,21 @@ class NameServer:
                 if data_receive:
                     message_query = parse_string_msg(data_receive)
 
-                    print(f"[SERVER]\t Receive request for {message_query.question.qname} via UDP")
+                    print(
+                        f"[SERVER]\t Receive request for {message_query.question.qname} via UDP")
 
                     # message question
                     msg_question = message_query.question
 
                     # find in cache first
-                    cached_record = self.CACHE.get(msg_question.qname, msg_question.qtype, msg_question.qclass)
+                    cached_record = self.CACHE.get(
+                        msg_question.qname, msg_question.qtype, msg_question.qclass)
 
                     if cached_record is not None:
                         # print("in cache")
                         message_result = Message(request=message_query)
-                        message_result.add_a_new_record_to_answer_section(cached_record)
+                        message_result.add_a_new_record_to_answer_section(
+                            cached_record)
                     else:
                         message_result = self.handle_query(message_query)
 
@@ -213,6 +223,17 @@ class NameServer:
             except Exception as e:
                 print("An exception occurs while handling a udp connection. " + str(e))
 
+
+if __name__ == '__main__':
+    try:
+        name_server = NameServer()
+        udp_thread = threading.Thread(target=name_server.start_listening_udp)
+        udp_thread.start()
+
+        tcp_thread = threading.Thread(target=name_server.start_listening_tcp)
+        tcp_thread.start()
+    except KeyboardInterrupt:
+        pass
 
 """
 .3.13. SOA RDATA format
