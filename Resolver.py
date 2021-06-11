@@ -9,6 +9,7 @@ from CacheSystem import CacheSystem
 from configurator import Configurator
 from ParseString import parse_string_cachesystem
 from ParseString import parse_string_question
+from Database import *
 
 
 class Resolver:
@@ -24,6 +25,8 @@ class Resolver:
             # open the local cache file to load past caches
             with open("CacheSystem.txt", "r") as f:
                 self.cache_system = parse_string_cachesystem(f.read())
+
+            create_dtb()
         except:
             # if a local file does not exist, which means there is no past cache,
             # do nothing
@@ -88,6 +91,7 @@ class Resolver:
         Resolve the request.
         Before asking the name server, resolver will check its cache system for cached resource records.
         """
+        """
         # Check the cache database for existing answer record
         cached_record = self.cache_system.get(name=request.question.qname + ".", rr_type=request.question.qtype,
                                               rr_class=request.question.qclass)
@@ -96,6 +100,13 @@ class Resolver:
         # return the record
         if cached_record is not None:
             return cached_record.to_string()
+        """
+        # Search in database
+        cache_record = query_from_dtb(request.question.qname + ".", request.question.qtype,
+                                        request.question.qclass)
+        
+        if cache_record is not None:
+            return cache_record.to_string()
 
         # Otherwise, send the query to the NameServer
         if tcp:
@@ -108,14 +119,27 @@ class Resolver:
         else:
             message_answer = parse_string_msg(response)
 
+        """
         # save to on-memory cache system
         self.save_to_cache_system(message_answer)
         # write new database to file
-        self.save_to_database()
+        self.save_to_txt()
+        """
+        self.save_to_database(message_answer)
 
         # return the first resource record in the answer section
         first_rr = message_answer.answers[0]
         return first_rr.to_string()
+
+    def save_to_database(self, message_response: Message):
+        for answer in message_response.answers:
+            add_to_dtb(answer)
+
+        for authority in message_response.authorities:
+            add_to_dtb(authority)
+
+        for add in message_response.additional:
+            add_to_dtb(add)
 
     def save_to_cache_system(self, message_response: Message):
         """
@@ -130,7 +154,7 @@ class Resolver:
         for add in message_response.additional:
             self.cache_system.put(add)
 
-    def save_to_database(self):
+    def save_to_txt(self):
         """
         Save cache to a local file.
         """
