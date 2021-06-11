@@ -54,7 +54,6 @@ class Configurator:
             tcp_port = int(input("TCP port number: "))
             Configurator.OTHERS.append(dict(ip=ip, udp=udp_port, tcp=tcp_port))
         os.system("clear")
-        assert num_partners == len(Configurator.OTHERS)
 
     @staticmethod
     def set_buffer_size(size: int):
