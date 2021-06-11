@@ -39,7 +39,7 @@ class CacheSystem:
         queried_record = ResourceRecord(
             name=name, rr_type=rr_type, rr_class=rr_class, ttl=0, rdata="")
         for cache in self._database:
-            if queried_record == cache.record:
+            if queried_record == cache.record and cache._ttd > int(time()):
                 return cache.record
 
         return None
@@ -86,6 +86,8 @@ if __name__ == '__main__':
     RR2 = ResourceRecord("bbb.com", 1, 1, 1000, "4.1.3")
     RR3 = ResourceRecord("ccc.com", 1, 1, 1000, "3.1.2")
     RR4 = ResourceRecord("ccc.", 1, 1, 1000, "3.1.2")
+
+
 
     #a.put(("aaa.com", 1, 1), RR1)
     a.put(rr1)
