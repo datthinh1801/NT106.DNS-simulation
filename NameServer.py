@@ -8,7 +8,6 @@ import dns.zone
 import dns.resolver
 import dns.exception
 import threading
-from CacheSystem import CacheSystem
 
 import socket
 from ParseString import parse_string_msg
@@ -24,7 +23,6 @@ class NameServer:
         to handle the query then send response or continuously send query to other zone(recursive-query)
         """
         self.ZONE = None
-        # self.CACHE = CacheSystem()
         self.database = Database('DatabaseNS.db')
         Configurator.config_me(5252, 5353)
 
@@ -91,10 +89,8 @@ class NameServer:
         return None
 
     def search_record_in_database(self, qname: str, qtype: int = 1, qclass: int = 1):
+        self.database.refresh()
         return self.database.query_from_database(qname, qtype, qclass)
-
-    def search_record_in_cache(self, qname: str, qtype: int = 1, qclass: int = 1):
-        return self.CACHE.get(qname, qtype, qclass)
 
     def search_record_in_zonefile(self, qname: str = None, qtype: str = None) -> ResourceRecord:
         return None
@@ -129,17 +125,6 @@ class NameServer:
         for add in response.additional:
             self.database.add_to_database(add)
 
-    def save_to_cache_system(self, response: Message):
-        """Save all RRs in the response to the cache system."""
-        for answer in response.answers:
-            self.CACHE.put(answer)
-
-        for authority in response.authorities:
-            self.CACHE.put(authority)
-
-        for add in response.additional:
-            self.CACHE.put(add)
-
     def start_listening_tcp(self):
         # Create a TCP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -170,6 +155,7 @@ class NameServer:
                     # find in cache first
                     cached_record = self.database.query_from_database(
                         msg_question.qname, msg_question.qtype, msg_question.qclass)
+                    
                     if cached_record is not None:
                         message_result = Message(request=message_query)
                         message_result.add_a_new_record_to_answer_section(
