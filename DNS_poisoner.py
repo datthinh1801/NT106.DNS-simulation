@@ -11,13 +11,13 @@ from netfilterqueue import NetfilterQueue
 
 def parse_cli_args():
     """Parse arguments from command-line interface."""
-    parser = ArgumentParser(prog="DNS Spoofer")
+    parser = ArgumentParser(prog="DNS poisoner")
     parser.add_argument("-t", "--target-domains",
                         nargs='+',
                         required=True,
                         metavar="TARGET DOMAIN",
                         dest="targets",
-                        help="Domain names that we want to spoof",
+                        help="Domain names that we want to poison",
                         type=str)
     parser.add_argument("-d", "--destined-domain",
                         nargs='?',
