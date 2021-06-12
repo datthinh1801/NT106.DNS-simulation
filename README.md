@@ -1,4 +1,12 @@
 # DNS simulation
+<p align="center">
+  <img width="600" height="400" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Logo_UIT_updated.jpg/800px-Logo_UIT_updated.jpg">
+</p>  
+
+<p align="center">
+  <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/.github/workflows/python-app.yml/badge.svg"
+</p>
+
 This project is part of a university curriculum which is *Basic Networking Programming*.  
 
 # Introduction
