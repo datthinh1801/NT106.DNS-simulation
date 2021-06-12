@@ -153,6 +153,8 @@ which carries the spoofed IP address specified by our `DNS_poisoner`.
 But if we make a query for `youtube.com`, the response is not poisoned (`youtube.com.;1;1;43;172.217.31.238`).  
 
 # Contributors
-- [*Dat Thinh*](https://github.com/datthinh1801)  
-- [*Xuan Ninh*](https://github.com/xuanninh1412)  
-- [*Minh Tien*](https://github.com/mt2651)
+<a href="https://github.com/datthinh1801/NT106.DNS-simulation/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=datthinh1801/NT106.DNS-simulation" />
+</a>
+
+Made with [contributors-img](https://contrib.rocks).
