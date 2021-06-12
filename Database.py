@@ -4,6 +4,9 @@ from time import time
 
 class Database:
     def __init__(self, name: str):
+        """ 
+        Database store ResourceRecord and time to die 
+        """
         # Connect databae
         self._name = name
         conn = sqlite3.connect(self._name)
@@ -28,6 +31,11 @@ class Database:
         conn.close()
 
     def refresh(self):
+        """ 
+        Refresh Database every time query 
+        Sqlite3 doesn't support support native variable syntax
+        But I can achieve virtually the same using an in-memory temp table.
+        """
         # Connect database
         conn = sqlite3.connect(self._name)
         # Create cursor
@@ -54,6 +62,10 @@ class Database:
         conn.close()
 
     def add_to_database(self, rr: ResourceRecord):
+        """
+        Add RR and ttd to Database
+        When insert to database only use tupple type data
+        """
         # Connect database
         conn = sqlite3.connect(self._name)
         # Create cursor
@@ -73,6 +85,10 @@ class Database:
 
     def query_from_database(self, name: str, rr_type: int = 1, 
                             rr_class: int = 1) -> ResourceRecord: 
+        """
+        Querey in database from tuple(name, typr, class)
+        Create table variables store (name, type, class) to excute
+        """
         # Connect database
         conn = sqlite3.connect(self._name)
 
@@ -106,14 +122,14 @@ class Database:
         else:
             return ResourceRecord(ans[0], ans[1], ans[2], ans[3], ans[4])
 
-
+    """format use database sqlite3"""
     # def default():
     #     # Connect database
     #     conn = sqlite3.connect('CacheSystem.db')
     #     # Create cursor
     #     c = conn.cursor()
 
-    #     """ code here """
+    """ code here """
 
     #     # Commit connect 
     #     conn.commit()
