@@ -9,13 +9,14 @@ from CacheSystem import CacheSystem
 from configurator import Configurator
 from ParseString import parse_string_cachesystem
 from ParseString import parse_string_question
-from Database import *
+from Database import Database
 
 
 class Resolver:
     def __init__(self):
         """Initialize a Resolver."""
-        self.cache_system = CacheSystem()
+        # self.cache_system = CacheSystem()
+        self.database = Database('DatabaseResolver.db')
         Configurator.config_me(9292, 9393)
         Configurator.config_others(int(input("Number of name servers: ")))
         self.this_ns_idx = 0
@@ -26,7 +27,6 @@ class Resolver:
             with open("CacheSystem.txt", "r") as f:
                 self.cache_system = parse_string_cachesystem(f.read())
 
-            create_dtb()
         except:
             # if a local file does not exist, which means there is no past cache,
             # do nothing
@@ -102,7 +102,8 @@ class Resolver:
             return cached_record.to_string()
         """
         # Search in database
-        cache_record = query_from_dtb(request.question.qname + ".", request.question.qtype,
+        self.database.refresh()
+        cache_record = self.database.query_from_database(request.question.qname + ".", request.question.qtype,
                                         request.question.qclass)
         
         if cache_record is not None:
@@ -133,13 +134,13 @@ class Resolver:
 
     def save_to_database(self, message_response: Message):
         for answer in message_response.answers:
-            add_to_dtb(answer)
+            self.database.add_to_database(answer)
 
         for authority in message_response.authorities:
-            add_to_dtb(authority)
+            self.database.add_to_database(authority)
 
         for add in message_response.additional:
-            add_to_dtb(add)
+            self.database.add_to_database(add)
 
     def save_to_cache_system(self, message_response: Message):
         """
