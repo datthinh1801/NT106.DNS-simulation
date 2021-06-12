@@ -2,6 +2,7 @@ from Message import Message
 from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
 from ResourceRecord import ResourceRecord
+from AES import AESCipher
 import dns.query
 import dns.zone
 import dns.resolver
@@ -141,7 +142,7 @@ class NameServer:
             connection, client_address = sock.accept()
             try:
                 byte_data = connection.recv(Configurator.BUFFER_SIZE)
-                data_receive = byte_data.decode('utf-8')
+                data_receive = AESCipher().decrypt(byte_data)
                 if data_receive:
                     message_query = parse_string_msg(data_receive)
                     print(
@@ -164,7 +165,7 @@ class NameServer:
                     if not isinstance(message_result, str):
                         message_result = message_result.to_string()
 
-                    response = message_result.encode('utf-8')
+                    response = AESCipher().encrypt(message_result)
                     connection.sendall(response)
                 else:
                     break  # more code needed to print out error
@@ -187,7 +188,7 @@ class NameServer:
         while True:
             try:
                 byte_data = sock.recvfrom(Configurator.BUFFER_SIZE)
-                data_receive = byte_data[0].decode('utf-8')
+                data_receive = AESCipher().decrypt(byte_data[0])
                 client_address = byte_data[1]
 
                 if data_receive:
@@ -215,7 +216,7 @@ class NameServer:
                     if not isinstance(message_result, str):
                         message_result = message_result.to_string()
 
-                    response = message_result.encode('utf-8')
+                    response = AESCipher().encrypt(message_result)
 
                     # print("response: ", message_result)
                     # print("-----\n")

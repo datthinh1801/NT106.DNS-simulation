@@ -5,6 +5,7 @@ domain name will be written to an output file; otherwise, write out a "Timeout".
 """
 import argparse
 from socket import *
+from AES import AESCipher
 from configurator import Configurator
 from MessageQuestion import MessageQuestion
 
@@ -87,7 +88,10 @@ def make_query(args_obj) -> str:
 
     # Send the message to the resolver
     resolver_address = (args_obj.resolver_ip, args_obj.resolver_port)
-    client_socket.sendto(msg.encode(), resolver_address)
+
+    # Encrypt message with AES256, return value are bytes type
+    msg = AESCipher().encrypt(msg)
+    client_socket.sendto(msg, resolver_address)
 
     # Extract the response only
     response = client_socket.recvfrom(1024)[0]
