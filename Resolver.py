@@ -1,6 +1,7 @@
 import socket
 import threading
 from Message import Message
+from AES import AESCipher
 from MessageHeader import MessageHeader
 from MessageQuestion import MessageQuestion
 from ResourceRecord import ResourceRecord
@@ -47,12 +48,14 @@ class Resolver:
 
         try:
             # Sending data
-            bytes_to_send = message.encode('utf-8')
+
+            # encrypt the message before send to server
+            bytes_to_send = AESCipher().encrypt(message)
             tcp_resolver_socket.sendall(bytes_to_send)
 
             # receiving data
-            response = tcp_resolver_socket.recv(
-                Configurator.BUFFER_SIZE).decode('utf-8')
+            response = AESCipher().decrypt(tcp_resolver_socket.recv(
+                Configurator.BUFFER_SIZE))
         except Exception as e:
             response = "Failed-" + str(e)
         finally:
@@ -64,7 +67,9 @@ class Resolver:
         Create a UDP connection to server, then send the message.
         If there is an error while sending and receiving the message, an exception will be returned.
         """
-        bytes_to_send = message.encode('utf-8')
+
+        # encrypt the message before send to server
+        bytes_to_send = AESCipher().encrypt(message)
         server_address = (
             Configurator.OTHERS[self.this_ns_idx]['ip'], Configurator.OTHERS[self.this_ns_idx]['udp'])
         self.this_ns_idx = (self.this_ns_idx + 1) % len(Configurator.OTHERS)
@@ -78,8 +83,9 @@ class Resolver:
             udp_resolver_socket.sendto(bytes_to_send, server_address)
 
             # Receiving data & convert bytes of data to a string
-            response = udp_resolver_socket.recvfrom(
-                Configurator.BUFFER_SIZE)[0].decode('utf-8')
+            # decrypt receive message
+            response = AESCipher().decrypt(udp_resolver_socket.recvfrom(
+                Configurator.BUFFER_SIZE)[0])
         except Exception as e:
             response = "Failed-" + str(e)
         finally:
@@ -142,19 +148,6 @@ class Resolver:
         for add in message_response.additional:
             self.database.add_to_database(add)
 
-    def save_to_cache_system(self, message_response: Message):
-        """
-        Cache resource record from a Message object.
-        """
-        for answer in message_response.answers:
-            self.cache_system.put(answer)
-
-        for authority in message_response.authorities:
-            self.cache_system.put(authority)
-
-        for add in message_response.additional:
-            self.cache_system.put(add)
-
     def save_to_txt(self):
         """
         Save cache to a local file.
@@ -178,7 +171,12 @@ class Resolver:
             # Receive an incoming request
             byte_data = listener_socket.recvfrom(Configurator.BUFFER_SIZE)
             client_address = byte_data[1]
-            request = byte_data[0].decode('utf-8').split(';')
+            request = byte_data[0].decode('utf-8').split('\n')
+            #print('request:',request)
+            if request[0] == 'encrypted':
+                request = AESCipher().decrypt(request[1]).split(';')
+            else:
+                request = request[1].split(';')
             protocol = request.pop()
             request = ';'.join(request)
 
