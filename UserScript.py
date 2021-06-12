@@ -70,6 +70,12 @@ def parse_args():
                         help='tcp/udp (udp by default)',
                         dest='protocol',
                         type=str)
+    parser.add_argument('--secure',
+                        nargs='?',
+                        default=128,
+                        help='1/0 secure connection with encrypted query payload (encrypted default)',
+                        dest='secure',
+                        type=int)
     return parser.parse_args()
 
 
@@ -89,8 +95,11 @@ def make_query(args_obj) -> str:
     # Send the message to the resolver
     resolver_address = (args_obj.resolver_ip, args_obj.resolver_port)
 
+    if args_obj.secure != 0:
     # Encrypt message with AES256, return value are bytes type
-    msg = AESCipher().encrypt(msg)
+        msg = b'encrypted\n'+AESCipher().encrypt(msg)
+    else:
+        msg = ("non-encrypted\n"+msg).encode()
     client_socket.sendto(msg, resolver_address)
 
     # Extract the response only

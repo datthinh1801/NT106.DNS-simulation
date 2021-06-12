@@ -160,7 +160,12 @@ class Resolver:
             # Receive an incoming request
             byte_data = listener_socket.recvfrom(Configurator.BUFFER_SIZE)
             client_address = byte_data[1]
-            request = AESCipher().decrypt(byte_data[0]).split(';')
+            request = byte_data[0].decode('utf-8').split('\n')
+            #print('request:',request)
+            if request[0] == 'encrypted':
+                request = AESCipher().decrypt(request[1]).split(';')
+            else:
+                request = request[1].split(';')
             protocol = request.pop()
             request = ';'.join(request)
 
