@@ -45,6 +45,7 @@ optional arguments:
   --port [PORT]         port number that the resolver is listening
   --protocol [PROTOCOL]
                         tcp/udp (udp by default)
+  --secure [SECURE]     1/0 secure connection with encrypted query payload (encrypted by default)
 ```
 
 ## DNS Poisoning
