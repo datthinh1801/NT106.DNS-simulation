@@ -3,8 +3,6 @@ import threading
 from Message import Message
 from AES import AESCipher
 from MessageHeader import MessageHeader
-from MessageQuestion import MessageQuestion
-from ResourceRecord import ResourceRecord
 from ParseString import parse_string_msg
 from configurator import Configurator
 from ParseString import parse_string_question
@@ -86,8 +84,8 @@ class Resolver:
         # Search in database
         self.database.refresh()
         cache_record = self.database.query_from_database(request.question.qname + ".", request.question.qtype,
-                                        request.question.qclass)
-        
+                                                         request.question.qclass)
+
         if cache_record is not None:
             return cache_record.to_string()
 
@@ -133,7 +131,7 @@ class Resolver:
             byte_data = listener_socket.recvfrom(Configurator.BUFFER_SIZE)
             client_address = byte_data[1]
             request = byte_data[0].decode('utf-8').split('\n')
-            #print('request:',request)
+            # print('request:',request)
             if request[0] == 'encrypted':
                 request = AESCipher().decrypt(request[1]).split(';')
             else:

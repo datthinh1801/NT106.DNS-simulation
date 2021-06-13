@@ -2,8 +2,6 @@ from Message import Message
 from MessageQuestion import MessageQuestion
 from MessageHeader import MessageHeader
 from ResourceRecord import ResourceRecord
-from Cache import Cache
-from CacheSystem import CacheSystem
 
 
 def parse_string_flag(flags: str) -> dict:
@@ -124,39 +122,20 @@ def parse_string_msg(msg: str) -> Message:
 
     # answers
     for _ in range(header_ancount):
-        message.add_a_new_record_to_answer_section(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_answer_section(
+            parse_string_resource_record(lines[cur_line]))
         cur_line += 1
 
     # authority
     for _ in range(header_nscount):
-        message.add_a_new_record_to_authority_section(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_authority_section(
+            parse_string_resource_record(lines[cur_line]))
         cur_line += 1
 
     # additional
     for _ in range(header_arcount):
-        message.add_a_new_record_to_additional_section(parse_string_resource_record(lines[cur_line]))
+        message.add_a_new_record_to_additional_section(
+            parse_string_resource_record(lines[cur_line]))
         cur_line += 1
 
     return message
-
-
-def parse_string_cache(cachestr: str) -> Cache:
-    """Parse a cache string to a Cache object."""
-    fields = cachestr.split('/')
-    rr = parse_string_resource_record(fields[0])
-    ttd = int(fields[1])
-    cache = Cache(rr)
-    cache._ttd = ttd
-    return cache
-
-
-def parse_string_cachesystem(cachesys: str) -> CacheSystem:
-    """Parse a CacheSystem string to a CacheSystem object."""
-    lines = cachesys.splitlines()
-    sys = CacheSystem()
-    sys._refresh_time = int(lines[0])
-    sys._next_refresh_time = int(lines[1])
-    for i in range(2, len(lines)):
-        cache = parse_string_cache(lines[i])
-        sys._database.append(cache)
-    return sys
