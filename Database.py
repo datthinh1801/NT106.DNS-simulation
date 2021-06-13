@@ -2,6 +2,7 @@ import sqlite3
 from ResourceRecord import ResourceRecord
 from time import time
 
+
 class Database:
     def __init__(self, name: str):
         """ 
@@ -13,7 +14,7 @@ class Database:
         # Create a cursor
         c = conn.cursor()
 
-        # Create table 
+        # Create table
         c.execute("""
             CREATE TABLE IF NOT EXISTS Cache(
                 domain text,
@@ -25,9 +26,9 @@ class Database:
             )
         """)
 
-        # Commit connect 
+        # Commit connect
         conn.commit()
-        # Close connect 
+        # Close connect
         conn.close()
 
     def refresh(self):
@@ -55,10 +56,10 @@ class Database:
             WHERE ttd < (SELECT timestamp FROM _Variables)
         """)
 
-        c.execute("DROP TABLE _Variables")   
-        # Commit connect 
+        c.execute("DROP TABLE _Variables")
+        # Commit connect
         conn.commit()
-        # Close connect 
+        # Close connect
         conn.close()
 
     def add_to_database(self, rr: ResourceRecord):
@@ -78,13 +79,13 @@ class Database:
 
         c.execute("INSERT INTO Cache VALUES (?,?,?,?,?,?)", data)
 
-        # Commit connect 
+        # Commit connect
         conn.commit()
-        # Close connect 
+        # Close connect
         conn.close()
 
-    def query_from_database(self, name: str, rr_type: int = 1, 
-                            rr_class: int = 1) -> ResourceRecord: 
+    def query_from_database(self, name: str, rr_type: int = 1,
+                            rr_class: int = 1) -> ResourceRecord:
         """
         Querey in database from tuple(name, typr, class)
         Create table variables store (name, type, class) to excute
@@ -110,11 +111,11 @@ class Database:
         """)
 
         ans = c.fetchone()
-        c.execute("DROP TABLE _Variables")    
+        c.execute("DROP TABLE _Variables")
 
-        # Commit connect 
+        # Commit connect
         conn.commit()
-        # Close connect 
+        # Close connect
         conn.close()
 
         if ans is None:
@@ -131,12 +132,12 @@ class Database:
 
     """ code here """
 
-    #     # Commit connect 
+    #     # Commit connect
     #     conn.commit()
-    #     # Close connect 
+    #     # Close connect
     #     conn.close()
 
-        
+
 if __name__ == '__main__':
     print("Resolver Database")
     # Connect database
@@ -149,9 +150,9 @@ if __name__ == '__main__':
     for dat in data:
         print(dat)
 
-    # Commit connect 
+    # Commit connect
     conn.commit()
-    # Close connect 
+    # Close connect
     conn.close()
 
     print("NameServer Database")
@@ -165,10 +166,7 @@ if __name__ == '__main__':
     for dat in data:
         print(dat)
 
-    # Commit connect 
+    # Commit connect
     conn.commit()
-    # Close connect 
+    # Close connect
     conn.close()
-
-
-

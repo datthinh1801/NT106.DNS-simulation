@@ -100,11 +100,11 @@ class MessageQuestion:
                     raise Exception("The size limit of label is 63 bytes.")
                     # return False
         # check if qtype is of invalid code
-        elif qtype not in MessageQuestion.QTYPE.values() & qtype not in MessageQuestion.INV_QTYPE.values() :
+        elif qtype not in MessageQuestion.QTYPE.values() & qtype not in MessageQuestion.INV_QTYPE.values():
             raise Exception("QTYPE does not exist.")
             # return False
         # check if qclass is of invalid code
-        elif qclass not in MessageQuestion.QCLASS.values() & qclass not in MessageQuestion.INV_QCLASS.values() :
+        elif qclass not in MessageQuestion.QCLASS.values() & qclass not in MessageQuestion.INV_QCLASS.values():
             raise Exception("QCLASS does not exist.")
             # return False
 

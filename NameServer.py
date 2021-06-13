@@ -75,7 +75,7 @@ class NameServer:
 
     def recursive_query(self, message_query: Message) -> Message:
         result = self.search_record_in_database(message_query.question.qname, message_query.question.qtype,
-                                             message_query.question.qclass)
+                                                message_query.question.qclass)
         if result is None:
             result = self.search_record_in_zonefile(
                 message_query.question.qname, message_query.question.qtype)
@@ -155,7 +155,7 @@ class NameServer:
                     # find in cache first
                     cached_record = self.database.query_from_database(
                         msg_question.qname, msg_question.qtype, msg_question.qclass)
-                    
+
                     if cached_record is not None:
                         message_result = Message(request=message_query)
                         message_result.add_a_new_record_to_answer_section(

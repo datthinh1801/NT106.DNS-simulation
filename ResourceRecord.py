@@ -91,7 +91,8 @@ class ResourceRecord:
             self._ttl = None
             self._rdlength = None
             self._rdata = None
-            raise Exception("Argument Exception while constructing a ResourceRecord object.")
+            raise Exception(
+                "Argument Exception while constructing a ResourceRecord object.")
 
     @staticmethod
     def _check_data_type_(*args, dtype: str) -> bool:
