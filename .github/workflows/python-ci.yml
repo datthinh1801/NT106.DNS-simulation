@@ -92,6 +92,9 @@ jobs:
         
     - name: Check Python version
       run: python2 --version
+    
+    - name: Check PIP version
+      run: pip2 --version
         
     - name: Install virtual environment (virtualenv)
       run: |
