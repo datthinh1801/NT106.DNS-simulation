@@ -6,7 +6,6 @@
 </a>
 
 <p align="center">
-  <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/ci-caching.yml/badge.svg">
   <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/python-dependencies.yml/badge.svg">
   <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/flake8.yml/badge.svg">
 </p>
