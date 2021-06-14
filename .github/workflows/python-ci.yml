@@ -10,24 +10,25 @@ on:
     branches: [ main ]
 
 jobs:
-  Ubuntu-Python-3:
-  
+  Windows-Python-3.9:
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v2.2.2
       with:
         python-version: 3.9
+        architecture: x64
+        
     - name: Check Python version
       run: python --version
         
-    - name: Create virtual environment (venv)
-      run: python3 -m venv env3_ubuntu
+    - name: Create virtual environment
+      run: python -m venv env
         
     - name: Activate the virtual environment
-      run: source ./env3_ubuntu/bin/activate
+      run: source ./env/bin/activate
       
     - name: Install dependencies
       run: |
@@ -38,66 +39,30 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py,env3_ubuntu
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py,env
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env3_ubuntu
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env
 
-    
-  Windows-Python-3:
-  
-    runs-on: windows-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-        
-    - name: Check Python version
-      run: py --version
-        
-    - name: Create virtual environment (venv)
-      run: py -m venv env3_windows
-        
-    - name: Activate the virtual environment
-      run: .\env3_windows\Scripts\activate
-      
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install flake8
-        pip install -r requirements.txt
-        
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py,env3_windows
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env3_windows
-        
-        
-  Ubuntu-Python-2:
-  
+          
+  Ubuntu-Python-3.9:
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 2.7
-      uses: actions/setup-python@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2.2.2
       with:
-        python-version: 2.7
+        python-version: 3.9
+        architecture: x64
         
     - name: Check Python version
       run: python --version
         
-    - name: Install virtual environment (virtualenv)
-      run: |
-        pip install virtualenv
-        python27 -m virtualenv env2_ubuntu
+    - name: Create virtual environment
+      run: python -m venv env
         
     - name: Activate the virtual environment
-      run:  source ./env2_ubuntu/bin/activate
+      run:  source ./env/bin/activate
       
     - name: Install dependencies
       run: |
@@ -114,16 +79,17 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
         
       
-  Windows-Python-2:
+  Windows-Python-2.7:
   
     runs-on: windows-latest
     
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 2.7
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v2.2.2
       with:
         python-version: 2.7
+        architecture: x64
         
     - name: Check Python version
       run: py --version
@@ -149,5 +115,38 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
         
-    - name: Deactivate virtual environment
-      run: .\env2_windows\Scripts\deactivate
+  Ubuntu-Python-2.7:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 2.7
+      uses: actions/setup-python@v2.2.2
+      with:
+        python-version: 2.7
+        architecture: x64
+        
+    - name: Check Python version
+      run: python --version
+        
+    - name: Create virtual environment
+      run: |
+        python -m pip install virtualenv
+        python -m virtualenv env
+        
+    - name: Activate the virtual environment
+      run:  source ./env/bin/activate
+      
+    - name: Install dependencies
+      run: |
+        sudo apt install build-essential python-dev libnetfilter-queue-dev
+        pip install --upgrade pip
+        pip install flake8
+        pip install -r requirements_python27.txt
+        
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --filename=DNS_poisoner.py
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
