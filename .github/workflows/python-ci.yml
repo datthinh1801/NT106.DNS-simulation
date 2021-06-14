@@ -66,17 +66,16 @@ jobs:
       
     - name: Install dependencies
       run: |
-        sudo apt install build-essential python-dev libnetfilter-queue-dev
         pip install --upgrade pip
         pip install flake8
-        pip install -r requirements_python27.txt
+        pip install -r requirements.txt
         
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --filename=DNS_poisoner.py
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py,env
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env
         
       
   Windows-Python-2_7:
@@ -92,21 +91,21 @@ jobs:
         architecture: x64
         
     - name: Check Python version
-      run: py --version
+      run: py2 --version
         
     - name: Install virtual environment (virtualenv)
       run: |
-        pip install virtualenv
-        py -m virtualenv env2_windows
+        pip2 install virtualenv
+        py2 -m virtualenv env2_windows
         
     - name: Activate the virtual environment
       run: .\env2_windows\Scripts\activate
       
     - name: Install dependencies
       run: |
-        pip install --upgrade pip
-        pip install flake8
-        pip install -r requirements_python27.txt
+        pip2 install --upgrade pip
+        pip2 install flake8
+        pip2 install -r requirements_python27.txt
         
     - name: Lint with flake8
       run: |
