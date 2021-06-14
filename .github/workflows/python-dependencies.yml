@@ -28,7 +28,7 @@ jobs:
     - name: Set up Python 3.9
       uses: actions/setup-python@v2.2.2
       with:
-        python-version: ${{ python-version }}
+        python-version: ${{ matrix.python-version }}
     
     - name: Restore cached pip
       uses: ./github/workflows/ci-caching
@@ -38,6 +38,7 @@ jobs:
       run: |
         pip3 install --upgrade pip
         pip3 install -r requirements.txt
+        
     - name: Install dependencies for python 2
       if: ${{ matrix.python-version == '2.7' }}
       run: |
