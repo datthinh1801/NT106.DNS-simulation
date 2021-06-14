@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Python application
+name: Python CI
 
 on:
   push:
@@ -10,19 +10,23 @@ on:
     branches: [ main ]
 
 jobs:
-  build_for_python3:
-
+  Ubuntu-Python-3:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+    - name: Install virtual environment
+      run: |
+        pip install virtualenv
+        python -m virtualenv env3_ubuntu
+    - name: Activate the virtual environment
+        source ./env3_ubuntu/bin/activate
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        pip install --upgrade pip
         pip install flake8
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
@@ -31,27 +35,90 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py
+    - name: Deactivate virtual environment
+      run: deactivate
+    
+  Windows-Python-3:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install virtual environment
+      run: |
+        pip install virtualenv
+        py -m virtualenv env3_windows
+    - name: Activate the virtual environment
+      run: .\env3_windows\Scripts\activate
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install flake8
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py
+    - name: Deactivate virtual environment
+      run: .\env3_windows\Scripts\deactivate
         
         
-  build_for_python2:
-
+  Ubuntu-Python-2:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 2.7
       uses: actions/setup-python@v2
       with:
         python-version: 2.7
+    - name: Install virtual environment
+      run: |
+        pip install virtualenv
+        python -m virtualenv env2_ubuntu
+    - name: Activate the virtual environment
+        source ./env2_ubuntu/bin/activate
     - name: Install dependencies
       run: |
-        sudo apt install build-essential python-dev libnetfilter-queue-dev
-        python -m pip install --upgrade pip
-        pip install flake8 
-        if [ -f requirements_python27.txt ]; then pip install -r requirements_python27.txt; fi
+        pip install --upgrade pip
+        pip install flake8
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --filename=DNS_poisoner.py
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py
+    - name: Deactivate virtual environment
+      run: deactivate
+      
+  Windows-Python-2:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 2.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 2.7
+    - name: Install virtual environment
+      run: |
+        pip install virtualenv
+        py -m virtualenv env2_windows
+    - name: Activate the virtual environment
+      run: .\env2_windows\Scripts\activate
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install flake8
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py
+    - name: Deactivate virtual environment
+      run: .\env2_windows\Scripts\deactivate
