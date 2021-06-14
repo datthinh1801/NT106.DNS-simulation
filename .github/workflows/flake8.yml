@@ -6,6 +6,8 @@ name: Lint with flake8
 on:
   push:
     branches: [ main ]
+    paths:
+      - "**.py"
   pull_request:
     branches: [ main ]
 
