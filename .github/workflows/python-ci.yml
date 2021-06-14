@@ -62,31 +62,6 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env
         
-      
-  Windows-Python-2_7:
-  
-    runs-on: windows-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 2.7
-      uses: actions/setup-python@v2.2.2
-      with:
-        python-version: 2.7
-        architecture: x64
-      
-    - name: Install dependencies
-      run: |
-        pip2 install --upgrade pip
-        pip2 install flake8
-        pip2 install -r requirements_python27.txt
-        
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --filename=DNS_poisoner.py
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
         
   Ubuntu-Python-2_7:
     runs-on: ubuntu-latest
