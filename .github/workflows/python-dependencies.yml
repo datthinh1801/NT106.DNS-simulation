@@ -35,7 +35,8 @@ jobs:
         pip3 install -r requirements.txt
         
     - name: Install dependencies for python 2
-      if: ${{ matrix.python-version == '2.7' }}
+      if: ${{ matrix.python-version == '2.7' && runner.os != 'Windows' }}
       run: |
+        sudo apt install build-essential python-dev libnetfilter-queue-dev
         pip2 install --upgrade pip
         pip2 install -r requirements_python27.txt
