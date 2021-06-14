@@ -20,6 +20,8 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+    - name: Check Python version
+      run: python --version
         
     - name: Create virtual environment (venv)
       run: python3 -m venv env3_ubuntu
@@ -39,9 +41,7 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py,env3_ubuntu
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env3_ubuntu
-        
-    - name: Deactivate virtual environment
-      run: source ./env3_ubuntu/bin/deactivate
+
     
   Windows-Python-3:
   
@@ -53,6 +53,9 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+        
+    - name: Check Python version
+      run: py --version
         
     - name: Create virtual environment (venv)
       run: py -m venv env3_windows
@@ -73,9 +76,6 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env3_windows
         
-    - name: Deactivate virtual environment
-      run: .\env3_windows\Scripts\deactivate
-        
         
   Ubuntu-Python-2:
   
@@ -87,6 +87,9 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 2.7
+        
+    - name: Check Python version
+      run: python --version
         
     - name: Install virtual environment (virtualenv)
       run: |
@@ -123,6 +126,9 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 2.7
+        
+    - name: Check Python version
+      run: py --version
         
     - name: Install virtual environment (virtualenv)
       run: |
