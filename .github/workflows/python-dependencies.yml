@@ -6,12 +6,12 @@ name: Dependencies
 on:
   push:
     branches: [ main ]
-    # paths-ignore:
-      # - "requirements*.txt"
+    paths:
+      - "requirements*.txt"
   pull_request:
     branches: [ main ]
-    # paths-ignore:
-      #- "requirements*.txt"
+    paths:
+      - "requirements*.txt"
 
 jobs:
   build:
