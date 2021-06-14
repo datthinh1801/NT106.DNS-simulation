@@ -21,19 +21,19 @@ def parse_string_flag(flags: str) -> dict:
     cur_bit_pos += 4
 
     # get 1-bit AA
-    d_flags['aa'] = bool(bin_str[cur_bit_pos])
+    d_flags['aa'] = True if int(bin_str[cur_bit_pos]) == 1 else False
     cur_bit_pos += 1
 
     # get 1-bit TC
-    d_flags['tc'] = bool(bin_str[cur_bit_pos])
+    d_flags['tc'] = True if int(bin_str[cur_bit_pos]) == 1 else False
     cur_bit_pos += 1
 
     # get 1-bit RD
-    d_flags['rd'] = bool(bin_str[cur_bit_pos])
+    d_flags['rd'] = True if int(bin_str[cur_bit_pos]) == 1 else False
     cur_bit_pos += 1
 
     # get 1-bit RA
-    d_flags['ra'] = bool(bin_str[cur_bit_pos])
+    d_flags['ra'] = True if int(bin_str[cur_bit_pos]) == 1 else False
     cur_bit_pos += 1
 
     # get 3-bit Z
