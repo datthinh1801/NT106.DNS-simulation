@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  Windows-Python-3.9:
+  Windows-Python-3_9:
     runs-on: ubuntu-latest
     
     steps:
@@ -44,7 +44,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env
 
           
-  Ubuntu-Python-3.9:
+  Ubuntu-Python-3_9:
     runs-on: ubuntu-latest
     
     steps:
@@ -79,7 +79,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
         
       
-  Windows-Python-2.7:
+  Windows-Python-2_7:
   
     runs-on: windows-latest
     
@@ -115,7 +115,7 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
         
-  Ubuntu-Python-2.7:
+  Ubuntu-Python-2_7:
     runs-on: ubuntu-latest
     
     steps:
