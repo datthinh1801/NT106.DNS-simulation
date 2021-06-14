@@ -23,7 +23,7 @@ jobs:
         pip install virtualenv
         python -m virtualenv env3_ubuntu
     - name: Activate the virtual environment
-        source ./env3_ubuntu/bin/activate
+      run: source ./env3_ubuntu/bin/activate
     - name: Install dependencies
       run: |
         pip install --upgrade pip
@@ -80,7 +80,7 @@ jobs:
         pip install virtualenv
         python -m virtualenv env2_ubuntu
     - name: Activate the virtual environment
-        source ./env2_ubuntu/bin/activate
+      run:  source ./env2_ubuntu/bin/activate
     - name: Install dependencies
       run: |
         pip install --upgrade pip
