@@ -21,10 +21,8 @@ jobs:
       with:
         python-version: 3.9
         
-    - name: Install virtual environment
-      run: |
-        pip install virtualenv
-        python3 -m virtualenv env3_ubuntu
+    - name: Create virtual environment (venv)
+      run: python3 -m venv env3_ubuntu
         
     - name: Activate the virtual environment
       run: source ./env3_ubuntu/bin/activate
@@ -43,7 +41,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env3_ubuntu
         
     - name: Deactivate virtual environment
-      run: deactivate
+      run: source ./env3_ubuntu/bin/deactivate
     
   Windows-Python-3:
   
@@ -56,10 +54,8 @@ jobs:
       with:
         python-version: 3.9
         
-    - name: Install virtual environment
-      run: |
-        pip install virtualenv
-        py -m virtualenv env3_windows
+    - name: Create virtual environment (venv)
+      run: py -m venv env3_windows
         
     - name: Activate the virtual environment
       run: .\env3_windows\Scripts\activate
@@ -92,10 +88,10 @@ jobs:
       with:
         python-version: 2.7
         
-    - name: Install virtual environment
+    - name: Install virtual environment (virtualenv)
       run: |
         pip install virtualenv
-        python2 -m virtualenv env2_ubuntu
+        python27 -m virtualenv env2_ubuntu
         
     - name: Activate the virtual environment
       run:  source ./env2_ubuntu/bin/activate
@@ -115,7 +111,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
         
     - name: Deactivate virtual environment
-      run: deactivate
+      run: source ./env2_ubuntu/bin/deactivate
       
   Windows-Python-2:
   
@@ -128,7 +124,7 @@ jobs:
       with:
         python-version: 2.7
         
-    - name: Install virtual environment
+    - name: Install virtual environment (virtualenv)
       run: |
         pip install virtualenv
         py -m virtualenv env2_windows
