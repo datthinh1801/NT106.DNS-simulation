@@ -95,7 +95,7 @@ jobs:
         
     - name: Install virtual environment (virtualenv)
       run: |
-        pip2 install virtualenv
+        # pip2 install virtualenv
         python2 -m virtualenv env2_windows
         
     - name: Activate the virtual environment
@@ -130,7 +130,7 @@ jobs:
         
     - name: Create virtual environment
       run: |
-        python2 -m pip install virtualenv
+        # python2 -m pip install virtualenv
         python2 -m virtualenv env
         
     - name: Activate the virtual environment
