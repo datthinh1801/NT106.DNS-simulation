@@ -23,12 +23,6 @@ jobs:
         
     - name: Check Python version
       run: python3 --version
-        
-    - name: Create virtual environment
-      run: python3 -m venv env
-        
-    - name: Activate the virtual environment
-      run: source ./env/bin/activate
       
     - name: Install dependencies
       run: |
@@ -54,15 +48,6 @@ jobs:
       with:
         python-version: 3.9
         architecture: x64
-        
-    - name: Check Python version
-      run: python3 --version
-        
-    - name: Create virtual environment
-      run: python3 -m venv env
-        
-    - name: Activate the virtual environment
-      run:  source ./env/bin/activate
       
     - name: Install dependencies
       run: |
@@ -89,26 +74,12 @@ jobs:
       with:
         python-version: 2.7
         architecture: x64
-        
-    - name: Check Python version
-      run: python2 --version
-    
-    - name: Check PIP version
-      run: pip2 --version
-        
-    - name: Install virtual environment (virtualenv)
-      run: |
-        python2 -m pip install virtualenv
-        python2 -m virtualenv env2_windows
-        
-    - name: Activate the virtual environment
-      run: .\env2_windows\Scripts\activate
       
     - name: Install dependencies
       run: |
-        python2 -m pip install --upgrade pip
-        python2 -m pip install flake8
-        python2 -m pip install -r requirements_python27.txt
+        pip2 install --upgrade pip
+        pip2 install flake8
+        pip2 install -r requirements_python27.txt
         
     - name: Lint with flake8
       run: |
@@ -127,17 +98,6 @@ jobs:
       with:
         python-version: 2.7
         architecture: x64
-        
-    - name: Check Python version
-      run: python2 --version
-        
-    - name: Create virtual environment
-      run: |
-        python2 -m pip install virtualenv
-        python2 -m virtualenv env
-        
-    - name: Activate the virtual environment
-      run:  source ./env/bin/activate
       
     - name: Install dependencies
       run: |
