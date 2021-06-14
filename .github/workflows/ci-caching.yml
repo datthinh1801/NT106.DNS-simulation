@@ -26,6 +26,8 @@ jobs:
     - uses: actions/cache@v2
       with:
         path: ${{ matrix.path }}
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        key: |
+          ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          ${{ runner.os }}-pip-${{ hashFiles('**/requirements_python27.txt') }}
         restore-keys: |
          ${{ runner.os }}-pip-
