@@ -6,7 +6,7 @@
 </a>
 
 <p align="center">
-  <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/.github/workflows/python-app.yml/badge.svg"
+  <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/python-ci.yml/badge.svg"
 </p>
 
 This project is part of a university curriculum which is *Basic Networking Programming*.  
