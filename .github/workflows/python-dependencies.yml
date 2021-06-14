@@ -6,84 +6,40 @@ name: Dependencies
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      # - "requirements*.txt"
+      - "**.py"
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      #- "requirements*.txt"
+      - "**.py"
 
 jobs:
-  Windows-Python-3_9:
-    runs-on: ubuntu-latest
+  Build dependencies:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+        python-version: [ '2.7', '3.9' ]
+    runs-on: ${{ matrix.os }}
     
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2.2.2
       with:
-        python-version: 3.9
-        architecture: x64
-        
-    - name: Check Python version
-      run: python3 --version
+        python-version: ${{ python-version }}
+    
+    - name: Restore cached pip
+      uses: ./github/workflows/ci-caching
       
-    - name: Install dependencies
+    - name: Install dependencies for python 3
+      if: ${{ matrix.python-version == '3.9' }}
       run: |
         pip3 install --upgrade pip
-        pip3 install flake8
         pip3 install -r requirements.txt
-        
-    - name: Lint with flake8
+    - name: Install dependencies for python 2
+      if: ${{ matrix.python-version == '2.7' }}
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py,env
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env
-
-          
-  Ubuntu-Python-3_9:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2.2.2
-      with:
-        python-version: 3.9
-        architecture: x64
-      
-    - name: Install dependencies
-      run: |
-        pip3 install --upgrade pip
-        pip3 install flake8
-        pip3 install -r requirements.txt
-        
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=DNS_poisoner.py,env
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=DNS_poisoner.py,env
-        
-        
-  Ubuntu-Python-2_7:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 2.7
-      uses: actions/setup-python@v2.2.2
-      with:
-        python-version: 2.7
-        architecture: x64
-      
-    - name: Install dependencies
-      run: |
-        sudo apt install build-essential python-dev libnetfilter-queue-dev
-        python2 -m pip install --upgrade pip
-        python2 -m pip install flake8
-        python2 -m pip install -r requirements_python27.txt
-        
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --filename=DNS_poisoner.py
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --filename=DNS_poisoner.py
+        pip2 install --upgrade pip2
+        pip2 install -r requirements_python27.txt
