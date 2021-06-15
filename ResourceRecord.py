@@ -17,7 +17,7 @@ class ResourceRecord:
         name        -> hostname (at max 255 bytes)
         type        -> 2 bytes of the RR TYPE code
         rr_class    -> 2 bytes of the RR CLASS code
-        ttl         -> a 32 bit signed integer specifies the cache interval of this RR. 0 means do not cache
+        ttl         -> a 32 bit signed integer specifies the cache interval of this RR (in seconds). 0 means do not cache
         rdata       -> data of corresponding query type
 
         [Alert] If some given parameters are invalid, the constructor will raise an Argument Exception.
