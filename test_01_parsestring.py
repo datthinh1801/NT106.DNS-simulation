@@ -13,10 +13,6 @@ def test_parse_header():
     lines = plain_header.splitlines()
     header_id = lines[0]
     header_flags = lines[1]
-    header_qdcount = int(lines[2])
-    header_ancount = int(lines[3])
-    header_nscount = int(lines[4])
-    header_arcount = int(lines[5])
     flags = parse_string_flag(header_flags)
     print(flags)
     parsed_header = MessageHeader(id=int(header_id),
