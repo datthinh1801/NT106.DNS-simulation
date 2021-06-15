@@ -8,6 +8,7 @@
 <p align="center">
   <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/python-dependencies.yml/badge.svg">
   <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/flake8.yml/badge.svg">
+  <img src="https://github.com/datthinh1801/NT106.DNS-simulation/actions/workflows/pytest.yml/badge.svg">
 </p>
 
 This project is part of a university curriculum which is *Basic Networking Programming*.  
