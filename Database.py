@@ -5,9 +5,7 @@ from time import time
 
 class Database:
     def __init__(self, name: str):
-        """ 
-        Database store ResourceRecord and time to die 
-        """
+        """Init a aatabase to cache ResourceRecord."""
         # Connect databae
         self._name = name
         conn = sqlite3.connect(self._name)
@@ -33,9 +31,7 @@ class Database:
 
     def refresh(self):
         """ 
-        Refresh Database every time query 
-        Sqlite3 doesn't support support native variable syntax
-        But I can achieve virtually the same using an in-memory temp table.
+        Refresh the database to remove out-dated caches. 
         """
         # Connect database
         conn = sqlite3.connect(self._name)
@@ -46,6 +42,8 @@ class Database:
         timestamp = (int(c.fetchone()[0]))
         time = (timestamp,)
 
+        # sqlite3 doesn't support literal value comparision;
+        # therefore an temporary _Variables table is necessary.
         c.execute("""
         CREATE TABLE IF NOT EXISTS _Variables(timestamp INTEGER)
         """)
@@ -64,31 +62,30 @@ class Database:
 
     def add_to_database(self, rr: ResourceRecord):
         """
-        Add RR and ttd to Database
-        When insert to database only use tupple type data
+        Add an RR to database.
         """
-        # Connect database
-        conn = sqlite3.connect(self._name)
-        # Create cursor
-        c = conn.cursor()
+        if rr.ttl > 0:
+            # Connect database
+            conn = sqlite3.connect(self._name)
+            # Create cursor
+            c = conn.cursor()
 
-        ttd = int(time()) + rr._ttl
+            ttd = int(time()) + rr.ttl
 
-        data = (rr._name, rr._type, rr._class,
-                rr._ttl, rr._rdata, ttd)
+            data = (rr.name, rr.rr_type, rr.rr_class,
+                    rr.ttl, rr.rdata, ttd)
 
-        c.execute("INSERT INTO Cache VALUES (?,?,?,?,?,?)", data)
+            c.execute("INSERT INTO Cache VALUES (?,?,?,?,?,?)", data)
 
-        # Commit connect
-        conn.commit()
-        # Close connect
-        conn.close()
+            # Commit connect
+            conn.commit()
+            # Close connect
+            conn.close()
 
     def query_from_database(self, name: str, rr_type: int = 1,
                             rr_class: int = 1) -> ResourceRecord:
         """
-        Querey in database from tuple(name, typr, class)
-        Create table variables store (name, type, class) to excute
+        Query a tuple of (name, typr, class) from database for a match.
         """
         # Connect database
         conn = sqlite3.connect(self._name)
@@ -98,6 +95,7 @@ class Database:
 
         data = (name, rr_type, rr_class)
 
+        # Create a temporary table for querying purposes
         c.execute("""
         CREATE TABLE IF NOT EXISTS _Variables(Name TEXT PRIMARY KEY, Class INTEGER, Type INTEGER)
         """)
