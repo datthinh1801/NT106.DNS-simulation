@@ -27,6 +27,7 @@ def test_parse_header():
                                   rd=flags['rd'],
                                   ra=flags['ra'],
                                   rcode=flags['rcode'])
+
     assert plain_header == parsed_header.to_string()
 
 
@@ -34,6 +35,7 @@ def test_parse_question():
     question = MessageQuestion('www.google.com', 1, 1)
     plain_question = question.to_string()
     parsed_question = parse_string_question(plain_question)
+
     assert plain_question == parsed_question.to_string()
 
 
@@ -41,6 +43,7 @@ def test_parse_resourcerecord():
     rr = ResourceRecord('www.google.com', 1, 1, 100, '127.0.0.1')
     plain_rr = rr.to_string()
     parsed_rr = parse_string_resource_record(plain_rr)
+
     assert plain_rr == parsed_rr.to_string()
 
 
@@ -50,4 +53,5 @@ def test_parse_string_msg():
     message = Message(header=header, question=question)
     plain_message = message.to_string()
     parsed_message = parse_string_msg(plain_message)
+
     assert plain_message == parsed_message.to_string()
