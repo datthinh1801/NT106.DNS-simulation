@@ -13,16 +13,14 @@ from AES import AESCipher
 class NS(NameServer):
     def __init__(self):
         self.database = Database('testNS.db')
-        Configurator.IP = '127.0.0.1'
-        Configurator.UDP_PORT = 5252
-        Configurator.TCP_PORT = 5353
 
     def start_listening_tcp(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = (Configurator.IP, Configurator.TCP_PORT)
+        server_address = (
+            Configurator.OTHERS[0]['ip'], Configurator.OTHERS[0]['tcp'])
 
-        print(f"[SERVER]\t Listening for TCP connections at {Configurator.IP}:" +
-              f"{Configurator.TCP_PORT}...")
+        print(f"[SERVER]\t Listening for TCP connections at {Configurator.OTHERS[0]['ip']}:" +
+              f"{Configurator.OTHERS[0]['tcp']}...")
 
         sock.bind(server_address)
         sock.listen(0)
@@ -66,11 +64,12 @@ class NS(NameServer):
     def start_listening_udp(self):
         # create a UDP socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server_address = (Configurator.IP, Configurator.UDP_PORT)
+        server_address = (
+            Configurator.OTHERS[0]['ip'], Configurator.OTHERS[0]['udp'])
 
         sock.bind(server_address)
-        print(f"[SERVER]\t Listening for UDP connections at {Configurator.IP}:" +
-              f"{Configurator.UDP_PORT}...")
+        print(f"[SERVER]\t Listening for UDP connections at {Configurator.OTHERS[0]['ip']}:" +
+              f"{Configurator.OTHERS[0]['udp']}...")
 
         try:
             byte_data = sock.recvfrom(Configurator.BUFFER_SIZE)
@@ -131,6 +130,9 @@ class RS(Resolver):
             Configurator.OTHERS[self.this_ns_idx]['ip'], Configurator.OTHERS[self.this_ns_idx]['tcp'])
         self.this_ns_idx = (self.this_ns_idx + 1) % len(Configurator.OTHERS)
 
+        print(f"[RESOLVER]\t Using TCP connections at {Configurator.IP}:" +
+              f"{Configurator.TCP_PORT}...")
+
         tcp_resolver_socket.settimeout(1.0)
         tcp_resolver_socket.connect(server_address)
 
@@ -158,6 +160,9 @@ class RS(Resolver):
         server_address = (
             Configurator.OTHERS[self.this_ns_idx]['ip'], Configurator.OTHERS[self.this_ns_idx]['udp'])
         self.this_ns_idx = (self.this_ns_idx + 1) % len(Configurator.OTHERS)
+
+        print(f"[RESOLVER]\t Using UDP connections at {Configurator.IP}:" +
+              f"{Configurator.UDP_PORT}...")
 
         # Create a UDP socket at client side
         udp_resolver_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
