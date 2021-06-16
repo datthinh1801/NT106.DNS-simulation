@@ -1,7 +1,7 @@
 # DNS simulation
 <a href="https://www.uit.edu.vn/">
 <p align="center">
-  <img width="600" height="400" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Logo_UIT_updated.jpg/800px-Logo_UIT_updated.jpg">
+  <img width="300" height="250" src="https://user-images.githubusercontent.com/44528004/122157620-5b2c2200-ce95-11eb-9b6c-8df62f5d282a.png">
 </p>
 </a>
 
