@@ -97,14 +97,14 @@ optional arguments:
 ## Demonstration
 We run the `main.py` on a machine whose IP address is `10.0.0.5`.  
 Then, we'll receive logs as followed:
-```bash
+```
 [SERVER]         Listening for UDP connections at 10.0.0.5:5252...
 [SERVER]         Listening for TCP connections at 10.0.0.5:5353...
 [RESOLVER]       Listening for clients' requests at 10.0.0.5:9292...
 ```  
 We run the `UserScript.py` to make a query for `facebook.com`. Here, we run this script on a machine whose IP address is `10.0.0.7`.  
 
-```bash
+```
 python3 UserScript.py -d facebook.com --ip 10.0.0.5 --port 9292
 ```  
 
@@ -116,7 +116,7 @@ facebook.com.;1;1;205;69.171.250.35
 
 In addition, if we examine the resolver's log, we can see a message specifying that the resolver has received a request from a user.  
 
-```bash
+```
 [RESOLVER]       Receive a request for facebook.com;A;IN from ('10.0.0.7', 49775) using UDP
 ```
 > If we want to specify the Resolver to make a query to the Nameserver via TCP, we need to execute the script with the `--protocol tcp` option.  
@@ -125,26 +125,26 @@ In addition, if we examine the resolver's log, we can see a message specifying t
 ### Now, let's make our hands dirty 🤡  
 First and foremost, as we already know the IP addresses of the machines that run the `main.py` and `UserScript.py`, it is unnecessary to run the `Network_Scanner.py`.  
 Next, we need to run the `ARP_spoofer.py` to make us become the man in the middle between the Resolver and User.
-```bash
+```
 sudo python3 ARP_spoofer.py -t 10.0.0.7 -g 10.0.0.5
 # or
 sudo python3 ARP_spoofer.py -t 10.0.0.5 -g 10.0.0.7
 # either is ok
 ```
 If the script is executed successfully, a successful message will be printed on the console.
-```bash
+```
 [+] Spoof ['10.0.0.5'] and ['10.0.0.7'] successfully!
 ```
 
 Finally, run our `DNS_poisoner.py`.
-```bash
+```
 sudo python DNS_poisoner.py -t facebook.com google.com -d 10.0.0.10
 ```
 Here, we specify the domains that we want to poison. In this example, we will poison any responses that carry the IP addresses of `facebook.com` and `google.com`.  
 These IP addresses will be changed to the one specified by the `-d` option, which is `10.0.0.10` in this example.  
   
 Now let's come back to the machine that runs `UserScript.py` and make a query for `facebook.com` again.
-```bash
+```
 python3 UserScript.py -d facebook.com --ip 10.0.0.5 --port 9292
 ```
 
