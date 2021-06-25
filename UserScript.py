@@ -119,7 +119,7 @@ def make_query(args_obj) -> str:
 
     # Receive the response from the resolver
     if args_obj.secure != 0:
-        response = AESCipher.decrypt(client_socket.recvfrom(1024)[0])
+        response = AESCipher().decrypt(client_socket.recvfrom(1024)[0])
     else:
         response = client_socket.recvfrom(1024)[0].decode("utf-8")
     client_socket.close()
