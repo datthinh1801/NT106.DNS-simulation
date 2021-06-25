@@ -12,7 +12,7 @@ from Database import Database
 class Resolver:
     def __init__(self):
         """Initialize a Resolver."""
-        self.database = Database('DatabaseResolver.db')
+        self.database = Database("DatabaseResolver.db")
         Configurator.config_me(9292, 9393)
         Configurator.config_others(int(input("Number of name servers: ")))
         self.this_ns_idx = 0
@@ -24,7 +24,9 @@ class Resolver:
         """
         tcp_resolver_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = (
-            Configurator.OTHERS[self.this_ns_idx]['ip'], Configurator.OTHERS[self.this_ns_idx]['tcp'])
+            Configurator.OTHERS[self.this_ns_idx]["ip"],
+            Configurator.OTHERS[self.this_ns_idx]["tcp"],
+        )
         self.this_ns_idx = (self.this_ns_idx + 1) % len(Configurator.OTHERS)
 
         tcp_resolver_socket.settimeout(1.0)
@@ -38,8 +40,9 @@ class Resolver:
             tcp_resolver_socket.sendall(bytes_to_send)
 
             # receiving data
-            response = AESCipher().decrypt(tcp_resolver_socket.recv(
-                Configurator.BUFFER_SIZE))
+            response = AESCipher().decrypt(
+                tcp_resolver_socket.recv(Configurator.BUFFER_SIZE)
+            )
         except Exception as e:
             response = "Failed-" + str(e)
         finally:
@@ -51,11 +54,10 @@ class Resolver:
         Create a UDP connection to server, then send the message.
         If there is an error while sending and receiving the message, an exception will be returned.
         """
-
-        # encrypt the message before send to server
-        bytes_to_send = AESCipher().encrypt(message)
         server_address = (
-            Configurator.OTHERS[self.this_ns_idx]['ip'], Configurator.OTHERS[self.this_ns_idx]['udp'])
+            Configurator.OTHERS[self.this_ns_idx]["ip"],
+            Configurator.OTHERS[self.this_ns_idx]["udp"],
+        )
         self.this_ns_idx = (self.this_ns_idx + 1) % len(Configurator.OTHERS)
 
         # Create a UDP socket at client side
@@ -64,12 +66,15 @@ class Resolver:
 
         try:
             # Send data
+            # encrypt the message before send to server
+            bytes_to_send = AESCipher().encrypt(message)
             udp_resolver_socket.sendto(bytes_to_send, server_address)
 
             # Receiving data & convert bytes of data to a string
             # decrypt receive message
-            response = AESCipher().decrypt(udp_resolver_socket.recvfrom(
-                Configurator.BUFFER_SIZE)[0])
+            response = AESCipher().decrypt(
+                udp_resolver_socket.recvfrom(Configurator.BUFFER_SIZE)[0]
+            )
         except Exception as e:
             response = "Failed-" + str(e)
         finally:
@@ -83,8 +88,11 @@ class Resolver:
         """
         # Search in database
         self.database.refresh()
-        cache_record = self.database.query_from_database(request.question.qname + ".", request.question.qtype,
-                                                         request.question.qclass)
+        cache_record = self.database.query_from_database(
+            request.question.qname + ".",
+            request.question.qtype,
+            request.question.qclass,
+        )
 
         if cache_record is not None:
             return cache_record.to_string()
@@ -120,27 +128,30 @@ class Resolver:
         Listen to incoming connections from clients to resolve requests in-house.
         """
         listener_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        listener_socket.bind(
-            (Configurator.IP, Configurator.UDP_PORT))
+        listener_socket.bind((Configurator.IP, Configurator.UDP_PORT))
         print(
-            f"[RESOLVER]\t Listening for clients' requests at {Configurator.IP}:" +
-            f"{Configurator.UDP_PORT}...")
+            f"[RESOLVER]\t Listening for clients' requests at {Configurator.IP}:"
+            + f"{Configurator.UDP_PORT}..."
+        )
 
         while True:
             # Receive an incoming request
             byte_data = listener_socket.recvfrom(Configurator.BUFFER_SIZE)
             client_address = byte_data[1]
-            request = byte_data[0].decode('utf-8').split('\n')
+            request = byte_data[0].decode("utf-8").split("\n")
             # print('request:',request)
-            if request[0] == 'encrypted':
-                request = AESCipher().decrypt(request[1]).split(';')
+            if request[0] == "encrypted":
+                encrypted = True
+                request = AESCipher().decrypt(request[1]).split(";")
             else:
-                request = request[1].split(';')
+                encrypted = False
+                request = request[1].split(";")
             protocol = request.pop()
-            request = ';'.join(request)
+            request = ";".join(request)
 
             print(
-                f"[RESOLVER]\t Receive a request for {request} from {client_address} using {protocol.upper()}")
+                f"[RESOLVER]\t Receive a request for {request} from {client_address} using {protocol.upper()}"
+            )
 
             # Handle the request and create a Message object for further query
             response = ""
@@ -152,19 +163,21 @@ class Resolver:
             if response == "":
                 header = MessageHeader()
                 request_message = Message(header=header, question=question)
-                if protocol.lower() == 'udp':
+                if protocol.lower() == "udp":
                     response = self.query(request=request_message, tcp=False)
                 else:
                     response = self.query(request=request_message, tcp=True)
 
             try:
-                listener_socket.sendto(
-                    response.encode('utf-8'), client_address)
+                if encrypted:
+                    listener_socket.sendto(AESCipher.encrypt(response), client_address)
+                else:
+                    listener_socket.sendto(response.encode("utf-8"), client_address)
             except:
                 continue
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         resolver = Resolver()
 
