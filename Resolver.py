@@ -139,7 +139,7 @@ class Resolver:
             byte_data = listener_socket.recvfrom(Configurator.BUFFER_SIZE)
             client_address = byte_data[1]
             request = byte_data[0].decode("utf-8").split("\n")
-            # print('request:',request)
+
             if request[0] == "encrypted":
                 encrypted = True
                 request = AESCipher().decrypt(request[1]).split(";")
@@ -170,9 +170,10 @@ class Resolver:
 
             try:
                 if encrypted:
-                    listener_socket.sendto(AESCipher.encrypt(response), client_address)
+                    bytes_to_send = AESCipher.encrypt(response)
                 else:
-                    listener_socket.sendto(response.encode("utf-8"), client_address)
+                    bytes_to_send = response.encode("utf-8")
+                listener_socket.sendto(response, client_address)
             except:
                 continue
 
