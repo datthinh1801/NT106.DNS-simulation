@@ -170,7 +170,7 @@ class Resolver:
 
             try:
                 if encrypted:
-                    bytes_to_send = AESCipher.encrypt(response)
+                    bytes_to_send = AESCipher().encrypt(response)
                 else:
                     bytes_to_send = response.encode("utf-8")
                 listener_socket.sendto(response, client_address)
