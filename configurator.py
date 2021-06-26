@@ -2,6 +2,8 @@ import subprocess
 import re
 import os
 
+from sys import platform
+
 
 class Configurator:
     """
@@ -9,6 +11,7 @@ class Configurator:
     A note for using this. Do not create an object from this class. Use the class directly.
     For example, Configurator.SERVER_IP to access the SERVER_IP attribute.
     """
+
     IP = ""
     TCP_PORT = None
     UDP_PORT = None
@@ -20,16 +23,18 @@ class Configurator:
     @staticmethod
     def get_ip() -> str:
         """Extract ip from the local machine."""
-        try:
-            ifconfig_result = str(
-                subprocess.check_output(["ifconfig", "eth0"]))
-            match = re.search(
-                r"inet \d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}", ifconfig_result)[0]
-            return match.split(' ')[1]
-        except:
+        if platform in ["linux", "linux2"]:
+            ifconfig_result = str(subprocess.check_output(["ifconfig", "eth0"]))
+            match = re.search(r"inet \d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}", ifconfig_result)[
+                0
+            ]
+            return match.split(" ")[1]
+        elif platform == "win32":
             ipconfig_result = str(subprocess.check_output(["ipconfig"]))
-            matches = re.findall(r"(?<=IPv4 Address. . . . . . . . . . . : )\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}",
-                                 ipconfig_result)
+            matches = re.findall(
+                r"(?<=IPv4 Address. . . . . . . . . . . : )\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}",
+                ipconfig_result,
+            )
             print("Select an ip from this list:")
             for i, ip in enumerate(matches):
                 print(f"({i}) {ip}")

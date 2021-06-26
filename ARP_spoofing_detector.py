@@ -48,7 +48,7 @@ def get_mac(target_ip):
 
 def get_ip() -> str:
     """Extract ip from the local machine."""
-    if platform == "linux" or platform == "linux2":
+    if platform in ["linux", "linux2"]:
         ifconfig_result = str(subprocess.check_output(["ifconfig", "eth0"]))
         match = re.search(r"inet \d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}", ifconfig_result)[0]
         return match.split(" ")[1]
