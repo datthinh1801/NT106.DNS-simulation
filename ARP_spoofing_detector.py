@@ -4,6 +4,7 @@ import scapy.all as scapy
 import subprocess
 from argparse import ArgumentParser
 from sys import platform
+import re
 
 
 def parse_cli_args():
@@ -74,17 +75,13 @@ def process_packet(packet):
     """
     Callback function to process sniffed packet.
     """
-    if (
-        packet.haslayer(scapy.ARP)
-        and packet[scapy.ARP].op == 2
-        and packet[scapy.ARP].psrc != get_ip()
-    ):
+    if packet.haslayer(scapy.ARP) and packet[scapy.ARP].op == 2:
         supposed_ip = packet[scapy.ARP].psrc
         supposed_mac = packet[scapy.ARP].hwsrc
         real_mac = get_mac(supposed_ip)
 
         if supposed_mac != real_mac:
-            print(f"You are under attacks! The attacker might be at {supposed_mac}")
+            print(f"You are under attacks!")
 
 
 args = parse_cli_args()
