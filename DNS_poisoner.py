@@ -72,7 +72,7 @@ def process_packet(packet):
 
             packet.set_payload(str(scapy_packet))
         else:
-            print "[+] Let it pass..."
+            print "[-] Let it pass..."
     packet.accept()
 
 
