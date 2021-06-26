@@ -102,7 +102,7 @@ class Database:
         c.execute("INSERT INTO _Variables VALUES (?,?,?)", data)
 
         c.execute("""
-        SELECT C.domain, C.type, C.class, C.ttd, C.data FROM Cache C
+        SELECT C.domain, C.type, C.class, C.ttl, C.data FROM Cache C
         WHERE C.domain = (SELECT Name FROM _Variables)
             AND C.type = (SELECT Type FROM _Variables)
             AND C.class = (SELECT Class FROM _Variables)
