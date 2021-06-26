@@ -84,5 +84,6 @@ def process_packet(packet):
             print(f"You are under attacks!")
 
 
-args = parse_cli_args()
-sniff(args.interface)
+if __name__ == "__main__":
+    args = parse_cli_args()
+    sniff(args.interface)

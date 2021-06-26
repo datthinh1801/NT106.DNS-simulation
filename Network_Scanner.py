@@ -7,9 +7,14 @@ import scapy.all as scapy
 
 def create_a_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--target", dest="target", nargs="?",
-                        help="IP address of a target host or an IP range of a target network",
-                        required=True)
+    parser.add_argument(
+        "-t",
+        "--target",
+        dest="target",
+        nargs="?",
+        help="IP address of a target host or an IP range of a target network",
+        required=True,
+    )
     return parser.parse_args()
 
 
@@ -19,7 +24,7 @@ def scan(ip):
 
     # Create an Ethernet frame
     # Default value of dst is already 'ff:ff:ff:ff:ff:ff'
-    ether = scapy.Ether(dst='ff:ff:ff:ff:ff:ff')
+    ether = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
 
     # Combine arp_request and ether into a single packet
     broadcast_packet = ether / arp_request
@@ -36,6 +41,7 @@ def print_result(responses):
         print(response[1].hwsrc)
 
 
-target = create_a_parser().target
-answers = scan(target)
-print_result(answers)
+if __name__ == "__main__":
+    target = create_a_parser().target
+    answers = scan(target)
+    print_result(answers)

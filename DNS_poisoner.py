@@ -77,23 +77,24 @@ def process_packet(packet):
 
 
 ### [MAIN ROUTINE] ###
-# INPUT chain is used for packets coming in this machine
-# OUTPUT chain is used for packets coming out this machine (after being altered)
-# FORWARD chain is used for packets that go through this machine (in & out - after being altered)
-if args.local is None:
-    subprocess.call(
-        "sudo iptables -I FORWARD -j NFQUEUE --queue-num 0", shell=True)
-else:
-    subprocess.call(
-        "sudo iptables -I INPUT -j NFQUEUE --queue-num 0", shell=True)
-    subprocess.call(
-        "sudo iptables -I OUTPUT -j NFQUEUE --queue-num 0", shell=True)
+if __name__ == '__main__':
+    # INPUT chain is used for packets coming in this machine
+    # OUTPUT chain is used for packets coming out this machine (after being altered)
+    # FORWARD chain is used for packets that go through this machine (in & out - after being altered)
+    if args.local is None:
+        subprocess.call(
+            "sudo iptables -I FORWARD -j NFQUEUE --queue-num 0", shell=True)
+    else:
+        subprocess.call(
+            "sudo iptables -I INPUT -j NFQUEUE --queue-num 0", shell=True)
+        subprocess.call(
+            "sudo iptables -I OUTPUT -j NFQUEUE --queue-num 0", shell=True)
 
-try:
-    queue = NetfilterQueue()
-    queue.bind(0, process_packet)
-    queue.run()
-except KeyboardInterrupt:
-    subprocess.call("sudo iptables --flush", shell=True)
-    print("[+] Flushing iptables...")
-    time.sleep(2)
+    try:
+        queue = NetfilterQueue()
+        queue.bind(0, process_packet)
+        queue.run()
+    except KeyboardInterrupt:
+        subprocess.call("sudo iptables --flush", shell=True)
+        print("[+] Flushing iptables...")
+        time.sleep(2)

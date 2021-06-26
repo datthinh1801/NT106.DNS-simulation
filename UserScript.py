@@ -126,14 +126,15 @@ def make_query(args_obj) -> str:
     return response if response is not None else None
 
 
-args = parse_args()
+if __name__ == "__main__":
+    args = parse_args()
 
-# Catch socket.timeout exception
-try:
-    response = make_query(args)
-except timeout:
-    response = "[EXCEPTION] Timeout"
-except Exception as e:
-    response = "[EXCEPTION] " + str(e)
-finally:
-    print(response)
+    try:
+        response = make_query(args)
+    except timeout:
+        # Catch socket.timeout exception
+        response = "[EXCEPTION] Timeout"
+    except Exception as e:
+        response = "[EXCEPTION] " + str(e)
+    finally:
+        print(response)
