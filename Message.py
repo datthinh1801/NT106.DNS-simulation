@@ -120,13 +120,13 @@ class Message:
             self._header.set_qr_flag()
         if opcode is not None:
             self._header.set_opcode(opcode)
-        if aa is not None and aa is True:
+        if aa is not None and aa:
             self._header.set_authoritative_flag()
-        if tc is not None and tc is True:
+        if tc is not None and tc:
             self._header.set_truncate_flag()
-        if rd is not None and rd is False:
+        if rd is not None and not rd:
             self._header.clear_recursion_desire_flag()
-        if ra is not None and ra is False:
+        if ra is not None and not ra:
             self._header.clear_recursion_available_flag()
         if rcode is not None:
             self._header.set_rcode(rcode)

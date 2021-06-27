@@ -3,9 +3,21 @@ import random
 
 
 class MessageHeader:
-    def __init__(self, id: int = None, qr: int = 0, opcode: int = 0, aa: bool = False, tc: bool = False,
-                 rd: bool = True, ra: bool = True, rcode: int = 0, qdcount: int = 0, ancount: int = 0, nscount: int = 0,
-                 arcount: int = 0):
+    def __init__(
+        self,
+        id: int = None,
+        qr: int = 0,
+        opcode: int = 0,
+        aa: bool = False,
+        tc: bool = False,
+        rd: bool = True,
+        ra: bool = True,
+        rcode: int = 0,
+        qdcount: int = 0,
+        ancount: int = 0,
+        nscount: int = 0,
+        arcount: int = 0,
+    ):
         """
         Initialize the header of a Message.
 
@@ -59,7 +71,7 @@ class MessageHeader:
         2 -> Server status request (STATUS)
         3-15 -> Reserved for future use
         """
-        if code in [0, 15]:
+        if code in range(15):
             self._opcode = code
 
     def set_authoritative_flag(self) -> None:
@@ -89,7 +101,7 @@ class MessageHeader:
         5 -> Refused - The name server refuses to perform the specified operation for policy reasons.
         6-15 -> Reserved for future use.
         """
-        if code in [0, 15]:
+        if code in range(16):
             self._rcode = code
 
     def set_count(self, field: str, count: int) -> None:

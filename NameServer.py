@@ -23,7 +23,7 @@ class NameServer:
         to handle the query then send response or continuously send query to other zone(recursive-query)
         """
         self.ZONE = None
-        self.database = Database('DatabaseNS.db')
+        self.database = Database("DatabaseNS.db")
         Configurator.config_me(5252, 5353)
 
     def handle_query(self, query_message: Message) -> Message:
@@ -32,15 +32,14 @@ class NameServer:
             header = query_message.header
             question = query_message.question
             if header.rd is True:
-                message_answer = self.recursive_query(query_message)
-                return message_answer
+                return self.recursive_query(query_message)
             else:
-                answer = self.non_recursive_query(header, question)
-                return answer
+                return self.non_recursive_query(header, question)
 
     @staticmethod
-    def convert_response_answer_to_response_message(response_answer: dns.message = None,
-                                                    message_query: Message = None) -> Message:
+    def convert_response_answer_to_response_message(
+        response_answer: dns.message = None, message_query: Message = None
+    ) -> Message:
         message_response = Message(request=message_query)
         # set the qr flag to 1, which indicates a response
         message_response.header.set_qr_flag()
@@ -56,60 +55,80 @@ class NameServer:
                 rr_class = RRs.rdclass
                 ttl = RRs.ttl
                 rdata = RRs[0]
-                resource_records = ResourceRecord(str(name), int(
-                    rr_type), int(rr_class), int(ttl), str(rdata))
+                resource_records = ResourceRecord(
+                    str(name), int(rr_type), int(rr_class), int(ttl), str(rdata)
+                )
                 if i == 1:
                     message_response.add_a_new_record_to_answer_section(
-                        resource_records)
-                if i == 2:
+                        resource_records
+                    )
+                elif i == 2:
                     for j in range(len(RRs)):
                         rdata = RRs[j]
-                        message_response.add_a_new_record_to_authority_section(ResourceRecord(
-                            str(name), int(rr_type), int(rr_class), int(ttl), str(rdata)))
-                if i == 3:
+                        message_response.add_a_new_record_to_authority_section(
+                            ResourceRecord(
+                                str(name),
+                                int(rr_type),
+                                int(rr_class),
+                                int(ttl),
+                                str(rdata),
+                            )
+                        )
+                elif i == 3:
                     message_response.add_a_new_record_to_additional_section(
-                        resource_records)
+                        resource_records
+                    )
 
         # return message response
         return message_response
 
     def recursive_query(self, message_query: Message) -> Message:
-        result = self.search_record_in_database(message_query.question.qname, message_query.question.qtype,
-                                                message_query.question.qclass)
+        result = self.search_record_in_database(
+            message_query.question.qname,
+            message_query.question.qtype,
+            message_query.question.qclass,
+        )
         if result is None:
             result = self.search_record_in_zonefile(
-                message_query.question.qname, message_query.question.qtype)
+                message_query.question.qname, message_query.question.qtype
+            )
 
         if result is None:
             result = self.query_out(message_query)
 
         return result
 
-    def non_recursive_query(self, header: MessageHeader, question: MessageQuestion) -> Message:
+    def non_recursive_query(
+        self, header: MessageHeader, question: MessageQuestion
+    ) -> Message:
         return None
 
     def search_record_in_database(self, qname: str, qtype: int = 1, qclass: int = 1):
         self.database.refresh()
         return self.database.query_from_database(qname, qtype, qclass)
 
-    def search_record_in_zonefile(self, qname: str = None, qtype: str = None) -> ResourceRecord:
+    def search_record_in_zonefile(
+        self, qname: str = None, qtype: str = None
+    ) -> ResourceRecord:
         return None
 
     def query_out(self, message_query: Message):
         qname = message_query.question.qname
         qtype = message_query.question.qtype
         resolver = dns.resolver.Resolver()
-        resolver.nameservers = ['8.8.8.8']
+        resolver.nameservers = ["8.8.8.8"]
         try:
             resolve_query = resolver.resolve(
-                qname, message_query.question.INV_QTYPE[qtype], raise_on_no_answer=False)
+                qname, message_query.question.INV_QTYPE[qtype], raise_on_no_answer=False
+            )
         except dns.exception.DNSException as e:
             response_message = "Failed-" + str(e)
             return response_message
 
         # handle error query here
         response_message = self.convert_response_answer_to_response_message(
-            resolve_query.response, message_query)
+            resolve_query.response, message_query
+        )
 
         self.save_to_database(response_message)
         return response_message
@@ -134,8 +153,10 @@ class NameServer:
         sock.bind(server_address)
 
         # listen for incoming connections
-        print(f"[SERVER]\t Listening for TCP connections at {Configurator.IP}:" +
-              f"{Configurator.TCP_PORT}...")
+        print(
+            f"[SERVER]\t Listening for TCP connections at {Configurator.IP}:"
+            + f"{Configurator.TCP_PORT}..."
+        )
         sock.listen(0)
 
         while True:
@@ -144,33 +165,33 @@ class NameServer:
             try:
                 byte_data = connection.recv(Configurator.BUFFER_SIZE)
                 data_receive = AESCipher().decrypt(byte_data)
-                if data_receive:
-                    message_query = parse_string_msg(data_receive)
-                    print(
-                        f"[SERVER]\t Receive request for {message_query.question.qname} via TCP")
-
-                    # message question
-                    msg_question = message_query.question
-
-                    # find in cache first
-                    cached_record = self.database.query_from_database(
-                        msg_question.qname, msg_question.qtype, msg_question.qclass)
-
-                    if cached_record is not None:
-                        message_result = Message(request=message_query)
-                        message_result.add_a_new_record_to_answer_section(
-                            cached_record)
-                    else:
-                        message_result = self.handle_query(message_query)
-                    # send the result back to resolver here
-
-                    if not isinstance(message_result, str):
-                        message_result = message_result.to_string()
-
-                    response = AESCipher().encrypt(message_result)
-                    connection.sendall(response)
-                else:
+                if not data_receive:
                     break  # more code needed to print out error
+                message_query = parse_string_msg(data_receive)
+                print(
+                    f"[SERVER]\t Receive request for {message_query.question.qname} via TCP"
+                )
+
+                # message question
+                msg_question = message_query.question
+
+                # find in cache first
+                cached_record = self.database.query_from_database(
+                    msg_question.qname, msg_question.qtype, msg_question.qclass
+                )
+
+                if cached_record is not None:
+                    message_result = Message(request=message_query)
+                    message_result.add_a_new_record_to_answer_section(cached_record)
+                else:
+                    message_result = self.handle_query(message_query)
+                # send the result back to resolver here
+
+                if not isinstance(message_result, str):
+                    message_result = message_result.to_string()
+
+                response = AESCipher().encrypt(message_result)
+                connection.sendall(response)
             except Exception as e:
                 print("Exception occurs while handle a tcp connection. " + str(e))
             finally:
@@ -184,8 +205,10 @@ class NameServer:
         # bind the socket to the port
         # sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) -> this is for overlap port
         sock.bind(server_address)
-        print(f"[SERVER]\t Listening for UDP connections at {Configurator.IP}:" +
-              f"{Configurator.UDP_PORT}...")
+        print(
+            f"[SERVER]\t Listening for UDP connections at {Configurator.IP}:"
+            + f"{Configurator.UDP_PORT}..."
+        )
 
         while True:
             try:
@@ -197,20 +220,21 @@ class NameServer:
                     message_query = parse_string_msg(data_receive)
 
                     print(
-                        f"[SERVER]\t Receive request for {message_query.question.qname} via UDP")
+                        f"[SERVER]\t Receive request for {message_query.question.qname} via UDP"
+                    )
 
                     # message question
                     msg_question = message_query.question
 
                     # find in cache first
                     cached_record = self.database.query_from_database(
-                        msg_question.qname, msg_question.qtype, msg_question.qclass)
+                        msg_question.qname, msg_question.qtype, msg_question.qclass
+                    )
 
                     if cached_record is not None:
                         # print("in cache")
                         message_result = Message(request=message_query)
-                        message_result.add_a_new_record_to_answer_section(
-                            cached_record)
+                        message_result.add_a_new_record_to_answer_section(cached_record)
                     else:
                         message_result = self.handle_query(message_query)
 
@@ -227,7 +251,7 @@ class NameServer:
                 print("An exception occurs while handling a udp connection. " + str(e))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         name_server = NameServer()
         udp_thread = threading.Thread(target=name_server.start_listening_udp)

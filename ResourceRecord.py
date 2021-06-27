@@ -170,7 +170,5 @@ class ResourceRecord:
 
     def __eq__(self, other):
         """Compare whether this ResourceRecord is equal to the other ResourceRecord."""
-        if self.name == other.name and self.rr_type == other.rr_type and \
-                self.rr_class == other.rr_class:
-            return True
-        return False
+        return self.name == other.name and self.rr_type == other.rr_type and \
+                self.rr_class == other.rr_class
