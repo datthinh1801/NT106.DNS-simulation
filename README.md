@@ -12,6 +12,7 @@
 </p>
 <p align="center">
   <img src="https://www.codefactor.io/repository/github/datthinh1801/nt106.dns-simulation/badge">
+  <a href="https://www.codacy.com/gh/datthinh1801/NT106.DNS-simulation/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datthinh1801/NT106.DNS-simulation&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/3be6c6100d694b888dc5cfe1e9039f47"/></a>
  </p>
 
 This project is part of a university curriculum which is *Basic Networking Programming*.  
