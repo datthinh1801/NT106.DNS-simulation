@@ -87,7 +87,7 @@ def spoof(target_ip, spoofed_ip):
 
 if __name__ == "__main__":
     # Enable packet forwarding
-    subprocess.call(["sudo", 'echo', '1' ,'>', "/proc/sys/net/ipv4/ip_forward"])
+    subprocess.call(["sudo", "echo", "1", ">", "/proc/sys/net/ipv4/ip_forward"])
 
     args = parse_arguments()
     target_ip = args.target_ip
@@ -121,5 +121,5 @@ if __name__ == "__main__":
             time.sleep(1)
 
         # Disable packet forwarding
-        subprocess.call(["sudo", 'echo', '0' ,'>', "/proc/sys/net/ipv4/ip_forward"])
+        subprocess.call(["sudo", "echo", "0", ">", "/proc/sys/net/ipv4/ip_forward"])
         print("[+] Quitting...")
