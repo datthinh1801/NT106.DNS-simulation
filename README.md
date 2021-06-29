@@ -155,7 +155,7 @@ The detector authenticates each ARP response. More specifically, anytime the hos
 
 For more information, use the `-h` option to the help message.  
 ```python
-sage: ARP Spoofing Detector [-h] [-i [INTERFACE]]
+usage: ARP Spoofing Detector [-h] [-i [INTERFACE]]
 
 optional arguments:
   -h, --help            show this help message and exit
